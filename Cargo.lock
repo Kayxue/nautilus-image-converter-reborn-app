@@ -534,6 +534,7 @@ dependencies = [
 name = "nautilus_image_converter"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "argh",
  "fast_image_resize",
  "image",
