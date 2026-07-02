@@ -7,7 +7,7 @@ pub struct ResizerConfig {}
 pub struct Resizer(pub ResizerConfig);
 
 impl Manipulator for Resizer {
-    fn manipulate_next_image(&self, image: DynamicImage) -> Result<()> {
+    fn manipulate_next_image(&self, image: &DynamicImage) -> Result<()> {
         todo!()
     }
 }

@@ -18,7 +18,7 @@ pub trait Reader {
 }
 
 pub trait Manipulator {
-    fn manipulate_next_image(&self, image: DynamicImage) -> Result<()>;
+    fn manipulate_next_image(&self, image: &DynamicImage) -> Result<()>;
 }
 
 pub struct ImageManipulator<T: Manipulator>(pub T);
@@ -30,7 +30,7 @@ impl<T: Manipulator> ImageManipulator<T> {
         Self(manipulator)
     }
 
-    pub fn manipulate_image(&self, image: DynamicImage) -> Result<()> {
+    pub fn manipulate_image(&self, image: &DynamicImage) -> Result<()> {
         self.0.manipulate_next_image(image)
     }
 }
