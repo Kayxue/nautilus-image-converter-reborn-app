@@ -7,8 +7,8 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 
 ## TODO
 - [X] Arguments receiving logic.
-- [ ] Read image
-- [ ] Save image
+- [X] Read image
+- [X] Save image
 - [ ] Basic image rotation using image
 - [ ] Basic Image resizing using fast_image_resize
 - [ ] Basic image resizing fallback using image

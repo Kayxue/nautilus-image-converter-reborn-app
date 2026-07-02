@@ -4,6 +4,7 @@ use image::{DynamicImage, ImageReader};
 pub trait Reader {
     fn read_image(&self, path: String) -> Result<DynamicImage> {
         ImageReader::open(path)?
+            .with_guessed_format()?
             .decode()
             .with_context(|| "Failed to read image")
     }
@@ -14,13 +15,7 @@ pub trait Reader {
 }
 
 pub trait Manipulator {
-    fn manipulate_images(&self) -> Result<ProcessedResult>;
+    fn manipulate_next_image(&self) -> Result<()>;
 }
 
-pub struct ImageManipulator<T: Manipulator>(T);
-
-pub struct ProcessedResult {
-    pub total: u32,
-    pub success: u32,
-    pub errors: u32,
-}
+pub struct ImageManipulator<T: Reader + Manipulator>(T);
