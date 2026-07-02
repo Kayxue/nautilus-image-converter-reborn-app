@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
 use image::{DynamicImage, ImageReader};
 
-mod resizer;
-mod rotator;
+pub mod resizer;
+pub mod rotator;
 
 pub trait Reader {
     fn read_image(&self, path: String) -> Result<DynamicImage> {
