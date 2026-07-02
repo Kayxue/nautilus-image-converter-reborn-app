@@ -5,7 +5,7 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 > [!NOTE]
 > Still under heavy development. Stay tuned.
 
-## Roadmap
+## TODO
 - [X] Arguments receiving logic.
 - [ ] Read image
 - [ ] Save image

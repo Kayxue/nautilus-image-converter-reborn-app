@@ -1,6 +1,7 @@
+use argh::{FromArgValue, FromArgs};
 use std::path::PathBuf;
 
-use argh::{FromArgValue, FromArgs};
+mod window;
 
 #[derive(FromArgValue, Debug)]
 enum Mode {
