@@ -7,7 +7,7 @@ pub struct RotatorConfig {}
 pub struct Rotator(pub RotatorConfig);
 
 impl Manipulator for Rotator {
-    fn manipulate_next_image(&self, image: &DynamicImage) -> Result<()> {
+    fn manipulate_next_image(&self, image: DynamicImage) -> Result<DynamicImage> {
         todo!()
     }
 }

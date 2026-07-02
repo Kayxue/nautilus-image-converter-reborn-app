@@ -1,6 +1,11 @@
 use argh::{FromArgValue, FromArgs};
 use std::path::PathBuf;
 
+use crate::manipulators::{
+    ImageManipulator, Reader,
+    resizer::{Resizer, ResizerConfig},
+};
+
 mod manipulators;
 mod window;
 
@@ -9,6 +14,11 @@ pub enum Mode {
     Resize,
     Rotate,
     Convert,
+}
+
+pub enum OutputMode {
+    InPlace,
+    NewFile(String),
 }
 
 #[derive(FromArgs)]
@@ -51,6 +61,29 @@ fn main() {
     if !output.as_ref().unwrap().is_dir() {
         eprintln!("Error: output path is not a directory.");
         std::process::exit(1);
+    }
+
+    let resizer_config = ResizerConfig(2500, 1363);
+
+    let resizer = Resizer(resizer_config);
+
+    let image_manipulator = ImageManipulator(resizer);
+
+    for path in paths {
+        let img = image_manipulator.read_image(path);
+        if let Err(e) = img {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+        let img = img.unwrap();
+        let result = image_manipulator.manipulate_image(img);
+        if let Err(e) = result {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+        let result = result.unwrap();
+        let output_path = "kkk.png";
+        result.save(&output_path).unwrap();
     }
 
     println!("Hello, world!");

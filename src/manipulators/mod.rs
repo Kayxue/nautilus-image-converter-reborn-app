@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::{Context, Result};
 use image::{DynamicImage, ImageReader};
 
@@ -5,20 +7,16 @@ pub mod resizer;
 pub mod rotator;
 
 pub trait Reader {
-    fn read_image(&self, path: String) -> Result<DynamicImage> {
+    fn read_image(&self, path: PathBuf) -> Result<DynamicImage> {
         ImageReader::open(path)?
             .with_guessed_format()?
             .decode()
             .with_context(|| "Failed to read image")
     }
-
-    fn write_image(&self, image: DynamicImage, path: String) -> Result<()> {
-        image.save(path).with_context(|| "Failed to write image")
-    }
 }
 
 pub trait Manipulator {
-    fn manipulate_next_image(&self, image: &DynamicImage) -> Result<()>;
+    fn manipulate_next_image(&self, image: DynamicImage) -> Result<DynamicImage>;
 }
 
 pub struct ImageManipulator<T: Manipulator>(pub T);
@@ -30,7 +28,7 @@ impl<T: Manipulator> ImageManipulator<T> {
         Self(manipulator)
     }
 
-    pub fn manipulate_image(&self, image: &DynamicImage) -> Result<()> {
+    pub fn manipulate_image(&self, image: DynamicImage) -> Result<DynamicImage> {
         self.0.manipulate_next_image(image)
     }
 }
