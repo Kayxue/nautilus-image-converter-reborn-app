@@ -9,3 +9,6 @@ argh = "0.1.19"
 fast_image_resize = { version = "6.0.0", features = ["image"] }
 image = "0.25.10"
 thiserror = "2.0.18"
+gtk = { version = "0.11", package = "gtk4", features = ["v4_22"] }
+relm4 = "0.11"
+tracker = "0.2.2"

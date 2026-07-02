@@ -9,9 +9,8 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 - [X] Arguments receiving logic.
 - [X] Read image
 - [X] Save image
-- [ ] Basic image rotation using image
 - [ ] Basic Image resizing using fast_image_resize
-- [ ] Basic image resizing fallback using image
+- [ ] Basic image rotation using image
 - [ ] Top window detection
 - [ ] GUI
 - [ ] Better error handling
