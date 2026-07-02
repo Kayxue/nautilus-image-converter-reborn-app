@@ -14,6 +14,7 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 - [ ] Basic image resizing fallback using image
 - [ ] Top window detection
 - [ ] GUI
+- [ ] Better error handling
 - [ ] Image conversion
 - [ ] (if possible) Rewrite extension part using Rust.
 - [ ] (if possible) Merge nautilus-extension part into this repo.
