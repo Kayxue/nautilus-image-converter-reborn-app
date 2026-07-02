@@ -5,7 +5,7 @@ mod manipulators;
 mod window;
 
 #[derive(FromArgValue, Debug)]
-enum Mode {
+pub enum Mode {
     Resize,
     Rotate,
     Convert,
