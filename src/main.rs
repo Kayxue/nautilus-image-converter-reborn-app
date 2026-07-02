@@ -1,6 +1,7 @@
 use argh::{FromArgValue, FromArgs};
 use std::path::PathBuf;
 
+mod manipulators;
 mod window;
 
 #[derive(FromArgValue, Debug)]

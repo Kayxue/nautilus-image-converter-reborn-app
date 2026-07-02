@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 argh = "0.1.19"
+fast_image_resize = { version = "6.0.0", features = ["image"] }
+image = "0.25.10"
+thiserror = "2.0.18"
