@@ -5,9 +5,23 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 > [!NOTE]
 > Still under heavy development. Stay tuned.
 
+## Repository
+
+Extensions repository: Uninitialized
+App repository: This repository
+
 ## Architecture
 
 ![Architecture](https://github.com/Kayxue/nautilus-image-converter-reborn-app/blob/master/archtecture.png)
+
+## Technology Stack
+
+- Rust
+- gtk-rs
+- Relm4
+- fast_image_resize
+- image
+- imageproc
 
 ## TODO
 - [X] Arguments receiving logic.
