@@ -7,7 +7,7 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 
 ## Architecture
 
-[Architecture](./architecture.png)
+[[Architecture](./architecture.png)](https://github.com/Kayxue/nautilus-image-converter-reborn-app/blob/master/archtecture.png)
 
 ## TODO
 - [X] Arguments receiving logic.
