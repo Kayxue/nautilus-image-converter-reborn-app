@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use crate::manipulators::{
     ImageManipulator, Reader,
     resizer::{Resizer, ResizerConfig},
+    rotator::{RotationAngle, RotationAngleKind, Rotator, RotatorConfig},
 };
 
 mod manipulators;
@@ -63,11 +64,11 @@ fn main() {
         std::process::exit(1);
     }
 
-    let resizer_config = ResizerConfig(2500, 1363);
+    let rotator_config = RotatorConfig(RotationAngle::Custom(45));
 
-    let resizer = Resizer(resizer_config);
+    let rotator = Rotator(rotator_config);
 
-    let image_manipulator = ImageManipulator(resizer);
+    let image_manipulator = ImageManipulator(rotator);
 
     for path in paths {
         let img = image_manipulator.read_image(path);

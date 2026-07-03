@@ -12,3 +12,4 @@ thiserror = "2.0.18"
 gtk = { version = "0.11", package = "gtk4", features = ["v4_22"] }
 relm4 = "0.11"
 tracker = "0.2.2"
+imageproc = "0.27.0"
