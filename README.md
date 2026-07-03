@@ -5,6 +5,10 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 > [!NOTE]
 > Still under heavy development. Stay tuned.
 
+## Architecture
+
+![Architecture](./architecture.png)
+
 ## TODO
 - [X] Arguments receiving logic.
 - [X] Read image
