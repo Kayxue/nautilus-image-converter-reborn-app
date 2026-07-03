@@ -14,7 +14,7 @@ App repository: This repository
 
 ![Architecture](https://github.com/Kayxue/nautilus-image-converter-reborn-app/blob/master/archtecture.png)
 
-## Technology Stack
+## Technology Stack (App part)
 
 - Rust
 - gtk-rs
