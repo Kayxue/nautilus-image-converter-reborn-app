@@ -7,12 +7,14 @@ use imageproc::geometric_transformations::{
     Border::Constant, Interpolation, rotate_about_center_no_crop,
 };
 
+#[derive(Debug)]
 pub enum RotationAngleKind {
     Ninety,
     HundredEighty,
     TwoHundredSeventy,
 }
 
+#[derive(Debug)]
 pub enum RotationAngle {
     Specific(RotationAngleKind),
     Custom(u32),

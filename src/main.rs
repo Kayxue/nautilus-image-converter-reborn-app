@@ -1,22 +1,22 @@
 use argh::{FromArgValue, FromArgs};
+use relm4::RelmApp;
 use std::path::PathBuf;
+use strum_macros::Display;
 
-use crate::manipulators::{
-    ImageManipulator, Reader,
-    resizer::{Resizer, ResizerConfig},
-    rotator::{RotationAngle, RotationAngleKind, Rotator, RotatorConfig},
-};
+use crate::window::{AppModel, Initializer};
 
 mod manipulators;
 mod window;
 
-#[derive(FromArgValue, Debug)]
+#[derive(FromArgValue, Debug, Display, Clone)]
+#[strum(serialize_all = "title_case")]
 pub enum Mode {
     Resize,
     Rotate,
     Convert,
 }
 
+#[derive(Debug)]
 pub enum OutputMode {
     InPlace,
     NewFile(String),
@@ -26,66 +26,34 @@ pub enum OutputMode {
 /// A image tool that can resize, rotate, and convert images.
 struct Args {
     /// operation mode: resize, rotate, or convert.
-    #[argh(option, short = 'm')]
-    mode: Option<Mode>,
-    /// path to the input image file.
-    #[argh(option, short = 'p')]
-    path: Option<String>,
-    /// path to the output image file.
-    #[argh(option, short = 'o')]
-    output: Option<PathBuf>,
+    #[argh(positional)]
+    mode: Mode,
+    /// paths to the input image files.
+    #[argh(positional)]
+    paths: Vec<String>,
 }
 
 fn main() {
-    let Args { mode, path, output } = argh::from_env();
-    if mode.is_none() || path.is_none() || output.is_none() {
-        eprintln!("Error: mode, path, and output are required.");
+    let Args { mode, paths } = argh::from_env();
+
+    if paths.is_empty() {
+        eprintln!("Error: at least one input path is required.");
         std::process::exit(1);
     }
 
-    let paths: Vec<PathBuf> = path
-        .unwrap()
-        .split(',')
-        .map(|e| e.parse().unwrap())
-        .collect::<Vec<_>>();
+    let paths_buf: Vec<PathBuf> = paths.iter().map(|e| e.parse().unwrap()).collect();
 
-    if paths.iter().any(|e| !e.exists()) {
+    if paths_buf.iter().any(|e| !e.exists()) {
         eprintln!("Error: one or more input paths do not exist.");
         std::process::exit(1);
     }
 
-    if !output.as_ref().unwrap().exists() {
-        eprintln!("Error: output path does not exist.");
-        std::process::exit(1);
-    }
+    let initializer = Initializer { mode, paths };
 
-    if !output.as_ref().unwrap().is_dir() {
-        eprintln!("Error: output path is not a directory.");
-        std::process::exit(1);
-    }
-
-    let rotator_config = RotatorConfig(RotationAngle::Custom(45));
-
-    let rotator = Rotator(rotator_config);
-
-    let image_manipulator = ImageManipulator(Box::new(rotator));
-
-    for path in paths {
-        let img = image_manipulator.read_image(path);
-        if let Err(e) = img {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
-        let img = img.unwrap();
-        let result = image_manipulator.manipulate_image(img);
-        if let Err(e) = result {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
-        let result = result.unwrap();
-        let output_path = "kkk.png";
-        result.save(&output_path).unwrap();
-    }
-
-    println!("Hello, world!");
+    let relm = RelmApp::new("com.kay.nautilus_image_converter")
+        // Pass empty args so GTK's GApplication doesn't see the image file
+        // paths and try to handle them via its built-in "open files" mechanism
+        // (which requires a registered open handler we don't have).
+        .with_args(vec![]);
+    relm.run::<AppModel>(initializer);
 }
