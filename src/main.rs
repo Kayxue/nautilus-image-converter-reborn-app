@@ -68,7 +68,7 @@ fn main() {
 
     let rotator = Rotator(rotator_config);
 
-    let image_manipulator = ImageManipulator(rotator);
+    let image_manipulator = ImageManipulator(Box::new(rotator));
 
     for path in paths {
         let img = image_manipulator.read_image(path);

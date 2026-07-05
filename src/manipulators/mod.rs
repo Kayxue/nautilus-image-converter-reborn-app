@@ -19,12 +19,12 @@ pub trait Manipulator {
     fn manipulate_next_image(&self, image: DynamicImage) -> Result<DynamicImage>;
 }
 
-pub struct ImageManipulator<T: Manipulator>(pub T);
+pub struct ImageManipulator(pub Box<dyn Manipulator>);
 
-impl<T: Manipulator> Reader for ImageManipulator<T> {}
+impl Reader for ImageManipulator {}
 
-impl<T: Manipulator> ImageManipulator<T> {
-    pub fn new(manipulator: T) -> Self {
+impl ImageManipulator {
+    pub fn new(manipulator: Box<dyn Manipulator>) -> Self {
         Self(manipulator)
     }
 
