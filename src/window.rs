@@ -22,7 +22,6 @@ pub struct Initializer {
 
 pub struct GeneralConfig {
     pub mode: Mode,
-    pub paths: Vec<String>,
     pub rotation_angle: Option<RotationAngle>,
     pub image_size: Option<ResizeKind>,
     pub output_mode: OutputMode,
@@ -86,6 +85,25 @@ impl SimpleComponent for HeaderModel {
     }
 }
 
+pub struct ResizeBodyModel {
+
+}
+
+pub enum ResizeBodyOutput{
+    UpdateImageSize(ResizeKind),
+    UpdateOutputMode(OutputMode),
+}
+
+pub struct RotateBodyModel {
+
+}
+
+pub enum RotateBodyOutput{
+    UpdateAngle(RotationAngle),
+    UpdateOutputMode(OutputMode),
+}
+
+
 pub struct AppModel {
     general_config: GeneralConfig,
     header: Controller<HeaderModel>,
@@ -95,7 +113,7 @@ pub struct AppModel {
 pub enum AppInput {
     Cancel,
     Execute,
-    UpdateImageSize(u32, u32),
+    UpdateImageSize(ResizeKind),
     UpdateAngle(RotationAngle),
     UpdateOutputMode(OutputMode),
 }
@@ -130,7 +148,6 @@ impl SimpleComponent for AppModel {
             Mode::Resize => AppModel {
                 general_config: GeneralConfig {
                     mode: Mode::Resize,
-                    paths: init.paths,
                     rotation_angle: None,
                     image_size: Some(ResizeKind::Percentage(0.5)),
                     output_mode: OutputMode::NewFile(".resized".to_owned()),
@@ -140,7 +157,6 @@ impl SimpleComponent for AppModel {
             Mode::Rotate => AppModel {
                 general_config: GeneralConfig {
                     mode: Mode::Rotate,
-                    paths: init.paths,
                     rotation_angle: Some(RotationAngle::Specific(Ninety)),
                     image_size: None,
                     output_mode: OutputMode::NewFile(".rotated".to_owned()),

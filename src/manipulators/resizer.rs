@@ -4,6 +4,7 @@ use fast_image_resize::Resizer as FIRResizer;
 use fast_image_resize::{IntoImageView, images::Image};
 use image::{DynamicImage, ImageBuffer};
 
+#[derive(Debug)]
 pub enum ResizeKind {
     Percentage(f32),
     Custom(u32, u32),

@@ -51,9 +51,6 @@ fn main() {
     let initializer = Initializer { mode, paths };
 
     let relm = RelmApp::new("com.kay.nautilus_image_converter")
-        // Pass empty args so GTK's GApplication doesn't see the image file
-        // paths and try to handle them via its built-in "open files" mechanism
-        // (which requires a registered open handler we don't have).
         .with_args(vec![]);
     relm.run::<AppModel>(initializer);
 }
