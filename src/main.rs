@@ -50,7 +50,6 @@ fn main() {
 
     let initializer = Initializer { mode, paths };
 
-    let relm = RelmApp::new("com.kay.nautilus_image_converter")
-        .with_args(vec![]);
+    let relm = RelmApp::new("com.kay.nautilus_image_converter").with_args(vec![]);
     relm.run::<AppModel>(initializer);
 }
