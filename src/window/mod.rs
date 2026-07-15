@@ -1,6 +1,5 @@
 use gtk::{
-    Button, HeaderBar, Window,
-    prelude::{ButtonExt, GtkWindowExt},
+    Box, Button, HeaderBar, Window, prelude::{BoxExt, ButtonExt, GtkWindowExt}
 };
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
@@ -12,7 +11,7 @@ use crate::{
     manipulators::{
         resizer::{ResizeKind, ResizerConfig},
         rotator::{RotationAngle, RotationAngleKind::Ninety, RotatorConfig},
-    },
+    }, window::window_body::{ResizeBodyModel, ResizeBodyOutput},
 };
 
 mod window_body;
@@ -112,7 +111,16 @@ impl SimpleComponent for AppModel {
         #[root]
         Window {
             set_title: Some(&format!("{} Images", model.general_config.mode)),
-            set_titlebar: Some(model.header.widget())
+            set_titlebar: Some(model.header.widget()),
+
+            set_margin_all: 12,
+
+            #[name(dialog_vbox1)]
+            Box {
+                set_spacing: 6,
+
+                
+            }
         }
     }
 
@@ -127,6 +135,14 @@ impl SimpleComponent for AppModel {
                 HeaderOutput::Cancel => AppInput::Cancel,
                 HeaderOutput::Proceed => AppInput::Execute,
             });
+
+        let resize_body: Controller<ResizeBodyModel> = ResizeBodyModel::builder()
+            .launch(())
+            .forward(sender.input_sender(), |msg|match msg{
+                ResizeBodyOutput::UpdateImageSize(kind) => AppInput::UpdateImageSize(kind),
+                ResizeBodyOutput::UpdateOutputMode(mode) => AppInput::UpdateOutputMode(mode)
+            });
+
         let model = match init.mode {
             Mode::Resize => AppModel {
                 general_config: GeneralConfig {
