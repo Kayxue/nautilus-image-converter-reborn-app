@@ -1,5 +1,6 @@
 use gtk::{
-    Box, Button, HeaderBar, Window, prelude::{BoxExt, ButtonExt, GtkWindowExt}
+    Box, Button, HeaderBar, Orientation, Widget, Window,
+    prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt},
 };
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
@@ -11,7 +12,8 @@ use crate::{
     manipulators::{
         resizer::{ResizeKind, ResizerConfig},
         rotator::{RotationAngle, RotationAngleKind::Ninety, RotatorConfig},
-    }, window::window_body::{ResizeBodyModel, ResizeBodyOutput},
+    },
+    window::window_body::{ResizeBodyModel, ResizeBodyOutput, RotateBodyModel, RotateBodyOutput},
 };
 
 mod window_body;
@@ -67,7 +69,8 @@ impl SimpleComponent for HeaderModel {
                 },
             },
             pack_end = &Button {
-                set_label: &format!("{}",model.mode),
+                set_label: &format!("{}", model.mode),
+                add_css_class: "suggested-action",
                 connect_clicked[sender] => move |_|{
                     sender.output(HeaderOutput::Proceed).unwrap()
                 },
@@ -89,6 +92,7 @@ impl SimpleComponent for HeaderModel {
 pub struct AppModel {
     general_config: GeneralConfig,
     header: Controller<HeaderModel>,
+    body_widget: Widget,
 }
 
 #[derive(Debug)]
@@ -113,13 +117,13 @@ impl SimpleComponent for AppModel {
             set_title: Some(&format!("{} Images", model.general_config.mode)),
             set_titlebar: Some(model.header.widget()),
 
-            set_margin_all: 12,
-
             #[name(dialog_vbox1)]
             Box {
+                set_orientation: Orientation::Vertical,
                 set_spacing: 6,
-
-                
+                set_margin_all: 12,
+                set_hexpand: true,
+                set_vexpand: true,
             }
         }
     }
@@ -136,36 +140,56 @@ impl SimpleComponent for AppModel {
                 HeaderOutput::Proceed => AppInput::Execute,
             });
 
-        let resize_body: Controller<ResizeBodyModel> = ResizeBodyModel::builder()
-            .launch(())
-            .forward(sender.input_sender(), |msg|match msg{
-                ResizeBodyOutput::UpdateImageSize(kind) => AppInput::UpdateImageSize(kind),
-                ResizeBodyOutput::UpdateOutputMode(mode) => AppInput::UpdateOutputMode(mode)
-            });
-
-        let model = match init.mode {
-            Mode::Resize => AppModel {
-                general_config: GeneralConfig {
-                    mode: Mode::Resize,
-                    rotation_angle: None,
-                    image_size: Some(ResizeKind::Percentage(0.5)),
-                    output_mode: OutputMode::NewFile(".resized".to_owned()),
-                },
-                header,
-            },
-            Mode::Rotate => AppModel {
-                general_config: GeneralConfig {
-                    mode: Mode::Rotate,
-                    rotation_angle: Some(RotationAngle::Specific(Ninety)),
-                    image_size: None,
-                    output_mode: OutputMode::NewFile(".rotated".to_owned()),
-                },
-                header,
-            },
+        let (body_widget, model) = match init.mode {
+            Mode::Resize => {
+                let resize_body: Controller<ResizeBodyModel> = ResizeBodyModel::builder()
+                    .launch(())
+                    .forward(sender.input_sender(), |msg| match msg {
+                        ResizeBodyOutput::UpdateImageSize(kind) => AppInput::UpdateImageSize(kind),
+                        ResizeBodyOutput::UpdateOutputMode(mode) => {
+                            AppInput::UpdateOutputMode(mode)
+                        }
+                    });
+                let widget = resize_body.widget().clone();
+                let model = AppModel {
+                    general_config: GeneralConfig {
+                        mode: Mode::Resize,
+                        rotation_angle: None,
+                        image_size: Some(ResizeKind::Percentage(0.5)),
+                        output_mode: OutputMode::NewFile(".resized".to_owned()),
+                    },
+                    header,
+                    body_widget: widget.into(),
+                };
+                (resize_body.widget().clone(), model)
+            }
+            Mode::Rotate => {
+                let rotate_body: Controller<RotateBodyModel> = RotateBodyModel::builder()
+                    .launch(())
+                    .forward(sender.input_sender(), |msg| match msg {
+                        RotateBodyOutput::UpdateAngle(angle) => AppInput::UpdateAngle(angle),
+                        RotateBodyOutput::UpdateOutputMode(mode) => {
+                            AppInput::UpdateOutputMode(mode)
+                        }
+                    });
+                let widget = rotate_body.widget().clone();
+                let model = AppModel {
+                    general_config: GeneralConfig {
+                        mode: Mode::Rotate,
+                        rotation_angle: Some(RotationAngle::Specific(Ninety)),
+                        image_size: None,
+                        output_mode: OutputMode::NewFile(".rotated".to_owned()),
+                    },
+                    header,
+                    body_widget: widget.into(),
+                };
+                (rotate_body.widget().clone(), model)
+            }
             Mode::Convert => todo!(),
         };
 
         let widgets = view_output!();
+        widgets.dialog_vbox1.append(&body_widget);
 
         ComponentParts { model, widgets }
     }
