@@ -1,5 +1,7 @@
 use gtk::{
-    Adjustment, Align, Box, CheckButton, DropDown, Entry, Label, Orientation, SpinButton, StringList, prelude::{BoxExt, CheckButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt}
+    Adjustment, Align, Box, CheckButton, DropDown, Entry, Label, Orientation, SpinButton,
+    StringList,
+    prelude::{BoxExt, CheckButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt},
 };
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, component};
 
@@ -12,7 +14,15 @@ pub struct ResizeBodyModel {
     pub cur_percent: u8,
     pub cur_width: u16,
     pub cur_height: u16,
-    pub append: String
+    pub append: String,
+}
+
+#[derive(Debug)]
+pub enum ResizeBodyInput {
+    UpdateCurrentPercent(u8),
+    UpdateCurrentWidth(u16),
+    UpdateCurrentHeight(u16),
+    UpdateAppend(String),
 }
 
 #[derive(Debug)]
@@ -25,7 +35,7 @@ pub enum ResizeBodyOutput {
 impl SimpleComponent for ResizeBodyModel {
     type Init = ();
 
-    type Input = ();
+    type Input = ResizeBodyInput;
     type Output = ResizeBodyOutput;
 
     view! {
@@ -78,6 +88,7 @@ impl SimpleComponent for ResizeBodyModel {
                         DropDown {
                             set_hexpand: true,
                             set_model: Some(&StringList::new(&["96x96", "128x128", "640x640", "800x800", "1024x768", "1280x960"]))
+
                         },
 
                         #[name(label9)]
@@ -163,7 +174,7 @@ impl SimpleComponent for ResizeBodyModel {
                     }
                 },
             },
-            
+
             #[name(label3)]
             Label {
                 set_valign: Align::Center,
@@ -230,24 +241,45 @@ impl SimpleComponent for ResizeBodyModel {
     fn init(
         _init: Self::Init,
         root: Self::Root,
-        sender: ComponentSender<Self>,
+        _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = ResizeBodyModel {
             cur_percent: 50,
             cur_width: 1000,
             cur_height: 1000,
-            append: ".resized".to_owned()
+            append: ".resized".to_owned(),
         };
 
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
+
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        match message {
+            ResizeBodyInput::UpdateAppend(append) => {
+                self.append = append;
+            }
+            ResizeBodyInput::UpdateCurrentPercent(percent) => self.cur_percent = percent,
+            ResizeBodyInput::UpdateCurrentHeight(height) => {
+                self.cur_height = height;
+            }
+            ResizeBodyInput::UpdateCurrentWidth(width) => {
+                self.cur_width = width;
+            }
+        };
+    }
 }
 
 pub struct RotateBodyModel {
     pub custom_angle: u8,
-    pub append: String
+    pub append: String,
+}
+
+#[derive(Debug)]
+pub enum RotateBodyInput {
+    UpdateCustomAngle(u8),
+    UpdateAppend(String),
 }
 
 #[derive(Debug)]
@@ -257,10 +289,10 @@ pub enum RotateBodyOutput {
 }
 
 #[component(pub)]
-impl SimpleComponent for RotateBodyModel{
+impl SimpleComponent for RotateBodyModel {
     type Init = ();
 
-    type Input = ();
+    type Input = RotateBodyInput;
     type Output = RotateBodyOutput;
 
     view! {
@@ -285,7 +317,7 @@ impl SimpleComponent for RotateBodyModel{
             Box {
                 set_valign: Align::Center,
                 set_spacing: 12,
-                
+
                 #[name(label5)]
                 Label {
                     set_halign: Align::Center
@@ -407,18 +439,28 @@ impl SimpleComponent for RotateBodyModel{
     }
 
     fn init(
-        init: Self::Init,
+        _init: Self::Init,
         root: Self::Root,
-        sender: ComponentSender<Self>,
-    ) -> ComponentParts<Self>
-    {
+        _sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let model = RotateBodyModel {
             custom_angle: 90,
-            append: 90.to_string()
+            append: 90.to_string(),
         };
 
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        match message {
+            RotateBodyInput::UpdateAppend(append) => {
+                self.append = append;
+            }
+            RotateBodyInput::UpdateCustomAngle(angle) => {
+                self.custom_angle = angle;
+            }
+        }
     }
 }

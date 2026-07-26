@@ -1,10 +1,11 @@
 use gtk::{
     Box, Button, HeaderBar, Orientation, Widget, Window,
+    gio::prelude::ApplicationExt,
     prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt},
 };
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
-    SimpleComponent, component,
+    SimpleComponent, component, main_application,
 };
 
 use crate::{
@@ -192,5 +193,25 @@ impl SimpleComponent for AppModel {
         widgets.dialog_vbox1.append(&body_widget);
 
         ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        match message {
+            AppInput::Cancel => {
+                main_application().quit();
+            }
+            AppInput::Execute => {
+                //TODO: Implement actual logic
+            }
+            AppInput::UpdateAngle(angle) => {
+                self.general_config.rotation_angle = Some(angle);
+            }
+            AppInput::UpdateImageSize(size) => {
+                self.general_config.image_size = Some(size);
+            }
+            AppInput::UpdateOutputMode(mode) => {
+                self.general_config.output_mode = mode;
+            }
+        }
     }
 }
