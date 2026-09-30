@@ -7,7 +7,10 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, com
 
 use crate::{
     OutputMode,
-    manipulators::{resizer::ResizeKind, rotator::{RotationAngle, RotationAngleKind}},
+    manipulators::{
+        resizer::ResizeKind,
+        rotator::{RotationAngle, RotationAngleKind},
+    },
 };
 
 pub struct ResizeBodyModel {

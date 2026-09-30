@@ -273,10 +273,7 @@ fn bind_transient_to_parent(window: &Window, parent_xid: u64) {
         };
 
         // Obtain our window's X11 surface and its XID.
-        let our_surface = match win
-            .surface()
-            .and_then(|s| s.downcast::<X11Surface>().ok())
-        {
+        let our_surface = match win.surface().and_then(|s| s.downcast::<X11Surface>().ok()) {
             Some(s) => s,
             None => {
                 eprintln!(
@@ -332,11 +329,7 @@ unsafe extern "C" {
 /// # Safety
 /// `display` must be a live GDK X11 display; both XIDs must be valid X11
 /// window identifiers.
-unsafe fn set_transient_for_xlib(
-    display: &gdk4_x11::X11Display,
-    our_xid: u64,
-    parent_xid: u64,
-) {
+unsafe fn set_transient_for_xlib(display: &gdk4_x11::X11Display, our_xid: u64, parent_xid: u64) {
     let xdisplay = unsafe { display.xdisplay() } as *mut std::ffi::c_void;
     unsafe {
         XSetTransientForHint(
@@ -352,11 +345,7 @@ unsafe fn set_transient_for_xlib(
 ///
 /// # Safety
 /// Same requirements as [`set_transient_for_xlib`].
-unsafe fn clear_transient_for_xlib(
-    display: &gdk4_x11::X11Display,
-    our_xid: u64,
-    root_xid: u64,
-) {
+unsafe fn clear_transient_for_xlib(display: &gdk4_x11::X11Display, our_xid: u64, root_xid: u64) {
     let xdisplay = unsafe { display.xdisplay() } as *mut std::ffi::c_void;
     unsafe {
         XSetTransientForHint(
