@@ -30,7 +30,7 @@ App repository: This repository
 - [X] Basic Image resizing using fast_image_resize
 - [X] Basic image rotation (rotate image for 90, 180, 270 degrees) using image
 - [X] Advanced image rotation (rotate image for arbitrary angle) using imageproc
-- [ ] Top window detection
+- [X] Top window detection
 - [ ] GUI
 - [ ] Better error handling
 - [ ] Image conversion

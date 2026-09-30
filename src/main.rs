@@ -31,10 +31,17 @@ struct Args {
     /// paths to the input image files.
     #[argh(positional)]
     paths: Vec<String>,
+    /// XID of the parent (Nautilus) window to set as transient-for (X11 only).
+    #[argh(option)]
+    parent_xid: Option<u64>,
 }
 
 fn main() {
-    let Args { mode, paths } = argh::from_env();
+    let Args {
+        mode,
+        paths,
+        parent_xid,
+    } = argh::from_env();
 
     if paths.is_empty() {
         eprintln!("Error: at least one input path is required.");
@@ -48,7 +55,11 @@ fn main() {
         std::process::exit(1);
     }
 
-    let initializer = Initializer { mode, paths };
+    let initializer = Initializer {
+        mode,
+        paths,
+        parent_xid,
+    };
 
     let relm = RelmApp::new("com.kay.nautilus_image_converter").with_args(vec![]);
     relm.run::<AppModel>(initializer);
