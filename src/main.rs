@@ -7,6 +7,7 @@ use crate::window::{AppModel, Initializer};
 
 mod manipulators;
 mod window;
+mod x11;
 
 #[cfg(test)]
 mod test;
