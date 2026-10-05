@@ -59,7 +59,7 @@ impl SimpleComponent for ResizeBodyModel {
         #[name(vbox1)]
         Box {
             set_hexpand: true,
-            set_vexpand: true,
+            set_vexpand: false,
             set_orientation: Orientation::Vertical,
             set_margin_all: 12,
             set_spacing: 12,
@@ -144,7 +144,6 @@ impl SimpleComponent for ResizeBodyModel {
 
                     #[name(hbox8)]
                     Box {
-                        set_vexpand: true,
                         set_spacing: 6,
 
                         #[name(custom_pct_radio_button)]
@@ -193,7 +192,6 @@ impl SimpleComponent for ResizeBodyModel {
 
                     #[name(hbox5)]
                     Box {
-                        set_vexpand: true,
                         set_spacing: 6,
 
                         #[name(custom_size_radiobutton)]
@@ -298,7 +296,6 @@ impl SimpleComponent for ResizeBodyModel {
 
                     #[name(hbox7)]
                     Box {
-                        set_vexpand: true,
                         set_spacing: 6,
 
                         #[name(append_radiobutton)]
@@ -431,7 +428,7 @@ impl SimpleComponent for RotateBodyModel {
         #[name(vbox1)]
         Box {
             set_hexpand: true,
-            set_vexpand: true,
+            set_vexpand: false,
             set_orientation: Orientation::Vertical,
             set_margin_all: 12,
             set_spacing: 12,

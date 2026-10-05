@@ -8,6 +8,9 @@ use crate::window::{AppModel, Initializer};
 mod manipulators;
 mod window;
 
+#[cfg(test)]
+mod test;
+
 #[derive(FromArgValue, Debug, Display, Clone)]
 #[strum(serialize_all = "title_case")]
 pub enum Mode {
@@ -16,7 +19,7 @@ pub enum Mode {
     Convert,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum OutputMode {
     InPlace,
     NewFile(String),
@@ -34,6 +37,9 @@ struct Args {
     /// XID of the parent (Nautilus) window to set as transient-for (X11 only).
     #[argh(option)]
     parent_xid: Option<u64>,
+    /// exported handle token of the parent (Nautilus) window (Wayland XDG Foreign).
+    #[argh(option)]
+    parent_handle: Option<String>,
 }
 
 fn main() {
@@ -41,6 +47,7 @@ fn main() {
         mode,
         paths,
         parent_xid,
+        parent_handle,
     } = argh::from_env();
 
     if paths.is_empty() {
@@ -59,6 +66,7 @@ fn main() {
         mode,
         paths,
         parent_xid,
+        parent_handle,
     };
 
     let relm = RelmApp::new("com.kay.nautilus_image_converter").with_args(vec![]);

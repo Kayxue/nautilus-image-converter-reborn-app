@@ -31,7 +31,7 @@ App repository: This repository
 - [X] Basic image rotation (rotate image for 90, 180, 270 degrees) using image
 - [X] Advanced image rotation (rotate image for arbitrary angle) using imageproc
 - [X] Top window detection
-- [ ] GUI
+- [X] GUI
 - [ ] Better error handling
 - [ ] Image conversion
 - [ ] (if possible) Rewrite extension part using Rust.
