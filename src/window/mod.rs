@@ -143,27 +143,15 @@ impl SimpleComponent for AppModel {
 
             #[name(stack)]
             Stack {
-                    set_transition_type: StackTransitionType::Crossfade,
-                    #[watch]
-                    set_visible_child_name: if model.is_processing { "progress" } else { "settings" },
+                set_transition_type: StackTransitionType::Crossfade,
 
-                    #[name(dialog_vbox1)]
-                    add_child = &Box {
-                        set_orientation: Orientation::Vertical,
-                        set_spacing: 6,
-                        set_margin_all: 12,
-                        set_hexpand: false,
-                        set_vexpand: false,
-                    } -> {
-                        set_name: "settings",
-                    },
-
-                    add_child = &Box {
+                if model.is_processing {
+                    Box {
                         set_orientation: Orientation::Vertical,
                         set_spacing: 16,
                         set_margin_all: 24,
                         set_hexpand: true,
-                        set_vexpand: false,
+                        set_vexpand: true,
                         set_valign: Align::Center,
 
                         #[name(spinner)]
@@ -193,10 +181,18 @@ impl SimpleComponent for AppModel {
                             #[watch]
                             set_text: Some(&format!("{}/{}", model.processed_count, model.total_count)),
                         },
-                    } -> {
-                        set_name: "progress",
-                    },
+                    }
+                } else {
+                    #[name(dialog_vbox1)]
+                    Box {
+                        set_orientation: Orientation::Vertical,
+                        set_spacing: 6,
+                        set_margin_all: 12,
+                        set_hexpand: true,
+                        set_vexpand: true,
+                    }
                 },
+            }
         }
     }
 
