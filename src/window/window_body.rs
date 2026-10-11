@@ -517,6 +517,7 @@ impl SimpleComponent for RotateBodyModel {
 
                         #[name(angle_spinbutton)]
                         SpinButton {
+                            set_hexpand: true,
                             set_sensitive: false,
                             set_adjustment: &Adjustment::new(90f64, 1f64, 360f64, 1f64, 45f64, 0f64),
                             set_climb_rate: 1f64,
