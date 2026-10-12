@@ -53,6 +53,6 @@ Stay tuned.
 Similar to [gtk-rs](https://github.com/gtk-rs/gtk4-rs#ai-contribution-policy)
 
 ## Contribution
-1. Follow ![Code of Conduct](https://rust-lang.org/policies/code-of-conduct/)
+1. Follow [Code of Conduct](https://rust-lang.org/policies/code-of-conduct/)
 2. Format files before pushing to GitHub
 3. If possible, please keep this app entirely in Rust and no non-rust dependencies such as libvip or Image Magick.
