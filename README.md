@@ -48,3 +48,11 @@ Stay tuned.
 - [ ] Better error handling
 - [ ] (if possible) Rewrite extension part using Rust.
 - [ ] (if possible) Merge nautilus-extension part into this repo.
+
+## AI Contribution Policy
+Similar to [gtk-rs](https://github.com/gtk-rs/gtk4-rs#ai-contribution-policy)
+
+## Contribution
+1. Follow ![Code of Conduct](https://rust-lang.org/policies/code-of-conduct/)
+2. Format files before pushing to GitHub
+3. If possible, please keep this app entirely in Rust and no non-rust dependencies such as libvip or Image Magick.
