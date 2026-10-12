@@ -8,6 +8,7 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 ## Features
 * **Standalone app:** It now becomes a standalone app, not binding to Nautilus File Manager anymore. However, you can still bind parent window via CLI arguments.
 * **Entirely in Rust:** No non-rust dependencies, which keeps this app performant, low memory footprint and stable.
+* **Parallelism:** Instead of processing images one by one, this app process images in parallel by using rayon.
 * **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
 ## Limitation
