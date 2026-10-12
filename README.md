@@ -23,8 +23,8 @@ Stay tuned.
 
 ## Repository
 
-Extensions repository: Uninitialized
-App repository: This repository
+* Extensions repository: Uninitialized.
+* App repository: This repository
 
 ## Technology Stack (App part)
 
