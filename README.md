@@ -5,14 +5,26 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 > [!NOTE]
 > Still under heavy development. Stay tuned.
 
-## Repository
+## Features
+* **Standalone app:** It now becomes a standalone app, not binding to Nautilus File Manager anymore.
+* **Zero additional dependencies:** No additional packages need to be installed on your system (such as libvip, ImageMagick)
+* **Fast and stable:** This app is written in Rust and with no non-rust dependencies, which keep this app performant and low memory footprint.
+* **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
-Extensions repository: Uninitialized
-App repository: This repository
+## Limitation
+* **No HEIC supported:** HEIC format is currently not supported.
+
+## Installation
+Stay tuned.
 
 ## Architecture
 
 ![Architecture](https://github.com/Kayxue/nautilus-image-converter-reborn-app/blob/master/archtecture.png)
+
+## Repository
+
+Extensions repository: Uninitialized
+App repository: This repository
 
 ## Technology Stack (App part)
 
@@ -32,7 +44,7 @@ App repository: This repository
 - [X] Advanced image rotation (rotate image for arbitrary angle) using imageproc
 - [X] Top window detection
 - [X] GUI
-- [ ] Better error handling
 - [ ] Image conversion
+- [ ] Better error handling
 - [ ] (if possible) Rewrite extension part using Rust.
 - [ ] (if possible) Merge nautilus-extension part into this repo.
