@@ -12,7 +12,7 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 * **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
 ## Limitation
-* **No HEIC supported:** HEIC format is currently not supported.
+* **Unsupported formats:** This app only support formats which image crate supports, in this reason, other formats such as HEIC are currently not supported
 
 ## Installation
 Stay tuned.
