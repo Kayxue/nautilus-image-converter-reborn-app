@@ -339,42 +339,25 @@ impl SimpleComponent for AppModel {
                 let input_sender = sender.input_sender().clone();
 
                 std::thread::spawn(move || {
-                    let runtime = tokio::runtime::Builder::new_multi_thread()
-                        .enable_all()
-                        .build()
-                        .expect("Failed to initialize Tokio runtime");
+                    use rayon::prelude::*;
 
-                    runtime.block_on(async move {
-                        let completed_counter = Arc::new(AtomicUsize::new(0));
+                    let completed_counter = AtomicUsize::new(0);
 
-                        let tasks = paths.into_iter().map(|path_str| {
-                            let output_mode = output_mode.clone();
-                            let manipulator = Arc::clone(&manipulator);
-                            let completed_counter = Arc::clone(&completed_counter);
-                            let input_sender = input_sender.clone();
-
-                            tokio::task::spawn_blocking(move || {
-                                let path = PathBuf::from(&path_str);
-                                if let Err(e) =
-                                    process_single_image(&path, &output_mode, &*manipulator)
-                                {
-                                    eprintln!(
-                                        "[nautilus-image-converter] Error processing {}: {:?}",
-                                        path_str, e
-                                    );
-                                }
-                                let completed =
-                                    completed_counter.fetch_add(1, Ordering::SeqCst) + 1;
-                                let _ = input_sender.send(AppInput::ProgressStep(completed));
-                            })
-                        });
-
-                        futures::future::join_all(tasks).await;
-
-                        // Brief pause so the user sees 100% completion
-                        tokio::time::sleep(std::time::Duration::from_millis(300)).await;
-                        let _ = input_sender.send(AppInput::Finished);
+                    paths.into_par_iter().for_each(|path_str| {
+                        let path = PathBuf::from(&path_str);
+                        if let Err(e) = process_single_image(&path, &output_mode, &*manipulator) {
+                            eprintln!(
+                                "[nautilus-image-converter] Error processing {}: {:?}",
+                                path_str, e
+                            );
+                        }
+                        let completed = completed_counter.fetch_add(1, Ordering::Relaxed) + 1;
+                        let _ = input_sender.send(AppInput::ProgressStep(completed));
                     });
+
+                    // Brief pause so the user sees 100% completion
+                    std::thread::sleep(std::time::Duration::from_millis(300));
+                    let _ = input_sender.send(AppInput::Finished);
                 });
             }
             AppInput::ProgressStep(count) => {
