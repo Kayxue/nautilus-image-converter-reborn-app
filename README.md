@@ -7,8 +7,8 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 
 ## Features
 * **Standalone app:** It now becomes a standalone app, not binding to Nautilus File Manager anymore.
-* **Zero additional dependencies:** No additional packages need to be installed on your system (such as libvip, ImageMagick)
-* **Fast and stable:** This app is written in Rust and with no non-rust dependencies, which keep this app performant and low memory footprint.
+* **Zero additional dependencies:** No additional packages required (such as libvip, ImageMagick)
+* **Fast and stable:** This app is written in Rust and with no non-rust dependencies, which keep this app performant, low memory footprint and stable.
 * **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
 ## Limitation
