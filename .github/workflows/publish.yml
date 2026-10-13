@@ -14,9 +14,9 @@ jobs:
   # Per-matrix container strategy:
   #   • x86_64  → ghcr.io/gtk-rs/gtk4-rs/gtk4:latest (Fedora-based, amd64 only)
   #              GTK4 ≥ 4.21 pre-built; recommended by the Relm4 book.
-  #   • arm64   → registry.opensuse.org/opensuse/tumbleweed:latest
-  #              gtk4-rs container has NO arm64 image. openSUSE Tumbleweed is
-  #              a rolling release with up-to-date GTK4 and official arm64 images.
+  #   • arm64   → fedora:latest
+  #              gtk4-rs container has NO arm64 image. fedora:latest has official
+  #              arm64 images and GTK4 in its repos.
   # ─────────────────────────────────────────────────────────────────────────────
   build-linux-packages:
     name: 📦 Linux packages (${{ matrix.arch }})
@@ -42,7 +42,7 @@ jobs:
             rust-target: aarch64-unknown-linux-gnu
             deb-arch: arm64
             # gtk4-rs container is amd64-only. Use fedora:latest instead:
-            #   • bash + gcc are pre-installed (no bootstrap problem)
+            #   • bash is pre-installed
             #   • official arm64 Docker image available
             #   • ships GTK4 >= 4.22 (Fedora tracks GNOME releases)
             #   • same dnf package manager as x86_64 → consistent steps
@@ -50,21 +50,25 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       # Both containers are Fedora-based and use dnf.
-      # x86_64 (gtk4-rs): GTK4 already in the image; install packaging tools only.
-      # arm64  (fedora):  GTK4 not pre-installed; add gtk4-devel + packaging tools.
+      # x86_64 (gtk4-rs): GTK4 already in the image; install packaging tools + gcc/mold.
+      # arm64  (fedora):  Install GTK4 dev libs, packaging tools + gcc/mold.
       - name: ⚙️ Install build and packaging tools
         run: |
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             dnf install -y \
+              gcc \
+              mold \
               patchelf \
               dpkg \
               openssl-devel \
               findutils
           else
             dnf install -y \
+              gcc \
+              mold \
               gtk4-devel \
               wayland-devel \
               libX11-devel \
@@ -75,10 +79,13 @@ jobs:
           fi
 
       # ── Linker ───────────────────────────────────────────────────────────
-      # setup-mold installs mold (faster linker) and the C toolchain it
-      # needs, replacing cc/gcc as a dependency in the install step above.
+      # Make mold the default system linker (high performance drop-in replacement for ld).
+      # gcc provides the C compiler (cc) needed by rustc and proc-macro build scripts.
       - name: ⚡ Set up mold linker
-        uses: rui314/setup-mold@v1
+        run: |
+          ln -sf /usr/bin/mold "$(realpath /usr/bin/ld)"
+          ln -sf /usr/bin/mold /usr/bin/ld
+          mold --version
 
       # ── Rust toolchain ────────────────────────────────────────────────────
       - name: 🦀 Set up Rust (stable)
@@ -129,13 +136,13 @@ jobs:
 
       # ── Upload artifacts ──────────────────────────────────────────────────
       - name: ⬆️ Upload .deb artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: deb-${{ matrix.arch }}
           path: dist/*.deb
 
       - name: ⬆️ Upload .rpm artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: rpm-${{ matrix.arch }}
           path: dist/*.rpm
@@ -153,12 +160,12 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: ⬇️ Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           path: artifacts/
           merge-multiple: true
