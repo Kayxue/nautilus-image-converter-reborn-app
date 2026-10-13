@@ -11,20 +11,18 @@ on:
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Build Linux packages (.deb + .rpm) for x86_64 and arm64
-  # Strategy:
-  #   • Use ghcr.io/gtk-rs/gtk4-rs/gtk4:latest container on both arches.
-  #     This image ships a modern GTK4 (>= 4.21) which Ubuntu apt does NOT
-  #     provide, and is the approach recommended by the Relm4 book.
-  #   • x86_64  → ubuntu-latest runner
-  #   • arm64   → ubuntu-24.04-arm runner (GitHub-hosted native ARM)
+  # Per-matrix container strategy:
+  #   • x86_64  → ghcr.io/gtk-rs/gtk4-rs/gtk4:latest (Fedora-based, amd64 only)
+  #              GTK4 ≥ 4.21 pre-built; recommended by the Relm4 book.
+  #   • arm64   → registry.opensuse.org/opensuse/tumbleweed:latest
+  #              gtk4-rs container has NO arm64 image. openSUSE Tumbleweed is
+  #              a rolling release with up-to-date GTK4 and official arm64 images.
   # ─────────────────────────────────────────────────────────────────────────────
   build-linux-packages:
     name: 📦 Linux packages (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
-    # gtk4-rs/gtk4 ships GTK4 >= 4.21 — Ubuntu apt only has 4.14.
-    # Using this container is the approach recommended by the Relm4 book.
     container:
-      image: ghcr.io/gtk-rs/gtk4-rs/gtk4:latest
+      image: ${{ matrix.container }}
     permissions:
       contents: write
 
@@ -36,26 +34,44 @@ jobs:
             runner: ubuntu-latest
             rust-target: x86_64-unknown-linux-gnu
             deb-arch: amd64
+            # Fedora-based; GTK4 >= 4.21 already installed in the image
+            container: ghcr.io/gtk-rs/gtk4-rs/gtk4:latest
 
           - arch: arm64
             runner: ubuntu-24.04-arm
             rust-target: aarch64-unknown-linux-gnu
             deb-arch: arm64
+            # gtk4-rs container is amd64-only — openSUSE Tumbleweed has
+            # official arm64 images and always ships the latest GTK4
+            container: registry.opensuse.org/opensuse/tumbleweed:latest
 
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v4
 
-      # ── Extra tools for packaging (GTK4 is already in the container) ──────
-      # The container is Fedora-based; install dpkg (for cargo-deb) and
-      # openssl headers. patchelf is used by cargo-deb to adjust RPATH.
-      - name: ⚙️ Install packaging tools
+      # x86_64 (gtk4-rs / Fedora): GTK4 already present, just add packaging tools.
+      # arm64  (openSUSE Tumbleweed): install GTK4 dev libs + packaging tools.
+      - name: ⚙️ Install build and packaging tools
         run: |
-          dnf install -y \
-            patchelf \
-            dpkg \
-            openssl-devel \
-            findutils
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            dnf install -y \
+              patchelf \
+              dpkg \
+              openssl-devel \
+              findutils
+          else
+            zypper --non-interactive refresh
+            zypper --non-interactive install -y \
+              gtk4-devel \
+              wayland-devel \
+              libX11-devel \
+              patchelf \
+              dpkg \
+              libopenssl-devel \
+              findutils \
+              curl \
+              tar
+          fi
 
       # ── Rust toolchain ────────────────────────────────────────────────────
       - name: 🦀 Set up Rust (stable)
