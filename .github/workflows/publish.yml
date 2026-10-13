@@ -41,20 +41,21 @@ jobs:
             runner: ubuntu-24.04-arm
             rust-target: aarch64-unknown-linux-gnu
             deb-arch: arm64
-            # gtk4-rs container is amd64-only — openSUSE Tumbleweed has
-            # official arm64 images and always ships the latest GTK4
-            container: registry.opensuse.org/opensuse/tumbleweed:latest
+            # gtk4-rs container is amd64-only. Use fedora:latest instead:
+            #   • bash + gcc are pre-installed (no bootstrap problem)
+            #   • official arm64 Docker image available
+            #   • ships GTK4 >= 4.22 (Fedora tracks GNOME releases)
+            #   • same dnf package manager as x86_64 → consistent steps
+            container: fedora:latest
 
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v4
 
-      # x86_64 (gtk4-rs / Fedora): GTK4 already present, just add packaging tools.
-      # arm64  (openSUSE Tumbleweed): install GTK4 dev libs + packaging tools.
-      # IMPORTANT: use `shell: sh` here — bash may not exist yet in a minimal
-      # openSUSE container. We install bash (and gcc) as part of this step.
+      # Both containers are Fedora-based and use dnf.
+      # x86_64 (gtk4-rs): GTK4 already in the image; install packaging tools only.
+      # arm64  (fedora):  GTK4 not pre-installed; add gtk4-devel + packaging tools.
       - name: ⚙️ Install build and packaging tools
-        shell: sh
         run: |
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             dnf install -y \
@@ -63,19 +64,14 @@ jobs:
               openssl-devel \
               findutils
           else
-            zypper --non-interactive refresh
-            zypper --non-interactive install -y \
-              bash \
-              gcc \
+            dnf install -y \
               gtk4-devel \
               wayland-devel \
               libX11-devel \
               patchelf \
               dpkg \
-              libopenssl-devel \
-              findutils \
-              curl \
-              tar
+              openssl-devel \
+              findutils
           fi
 
       # ── Rust toolchain ────────────────────────────────────────────────────
