@@ -12,13 +12,19 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Build Linux packages (.deb + .rpm) for x86_64 and arm64
   # Strategy:
-  #   • x86_64  → native ubuntu-latest runner, no cross-compilation needed
-  #   • arm64   → ubuntu-24.04-arm runner (GitHub-hosted ARM runner)
-  #               uses the same native approach; GTK4 libs installed via apt
+  #   • Use ghcr.io/gtk-rs/gtk4-rs/gtk4:latest container on both arches.
+  #     This image ships a modern GTK4 (>= 4.21) which Ubuntu apt does NOT
+  #     provide, and is the approach recommended by the Relm4 book.
+  #   • x86_64  → ubuntu-latest runner
+  #   • arm64   → ubuntu-24.04-arm runner (GitHub-hosted native ARM)
   # ─────────────────────────────────────────────────────────────────────────────
   build-linux-packages:
     name: 📦 Linux packages (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
+    # gtk4-rs/gtk4 ships GTK4 >= 4.21 — Ubuntu apt only has 4.14.
+    # Using this container is the approach recommended by the Relm4 book.
+    container:
+      image: ghcr.io/gtk-rs/gtk4-rs/gtk4:latest
     permissions:
       contents: write
 
@@ -40,19 +46,16 @@ jobs:
       - name: 📦 Checkout repository
         uses: actions/checkout@v4
 
-      # ── System dependencies ───────────────────────────────────────────────
-      - name: ⚙️ Install GTK4 and system dependencies
+      # ── Extra tools for packaging (GTK4 is already in the container) ──────
+      # The container is Fedora-based; install dpkg (for cargo-deb) and
+      # openssl headers. patchelf is used by cargo-deb to adjust RPATH.
+      - name: ⚙️ Install packaging tools
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y \
-            libgtk-4-dev \
-            libglib2.0-dev \
-            libx11-dev \
-            libwayland-dev \
-            pkg-config \
-            build-essential \
-            libssl-dev \
-            patchelf
+          dnf install -y \
+            patchelf \
+            dpkg \
+            openssl-devel \
+            findutils
 
       # ── Rust toolchain ────────────────────────────────────────────────────
       - name: 🦀 Set up Rust (stable)
