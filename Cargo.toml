@@ -16,3 +16,30 @@ imageproc = "0.27.0"
 strum_macros = "0.28.0"
 gdk4-wayland = "0.11"
 rayon = "1.12.0"
+
+# ─── Debian packaging (cargo-deb) ────────────────────────────────────────────
+[package.metadata.deb]
+maintainer = "Kay <s0990006@gmail.com>"
+copyright = "2026 Kay"
+license-file = ["LICENSE", "0"]
+extended-description = """\
+Standalone app to convert, resize, and rotate images. \
+Built with Rust and GTK4 via Relm4."""
+depends = "$auto, libgtk-4-1, libwayland-client0"
+assets = [
+    ["target/release/nautilus_image_converter", "usr/bin/nautilus-image-converter", "755"],
+    ["README.md", "usr/share/doc/nautilus-image-converter-reborn/README.md", "644"],
+    ["LICENSE", "usr/share/doc/nautilus-image-converter-reborn/LICENSE", "644"],
+]
+
+# ─── RPM packaging (cargo-generate-rpm) ──────────────────────────────────────
+[package.metadata.generate-rpm]
+license = "MIT"
+assets = [
+    { source = "target/release/nautilus_image_converter", dest = "/usr/bin/nautilus-image-converter", mode = "755" },
+    { source = "README.md", dest = "/usr/share/doc/nautilus-image-converter-reborn/README.md", mode = "644" },
+    { source = "LICENSE", dest = "/usr/share/doc/nautilus-image-converter-reborn/LICENSE", mode = "644" },
+]
+[package.metadata.generate-rpm.requires]
+gtk4 = "*"
+wayland-libs-client = "*"
