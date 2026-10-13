@@ -51,7 +51,10 @@ jobs:
 
       # x86_64 (gtk4-rs / Fedora): GTK4 already present, just add packaging tools.
       # arm64  (openSUSE Tumbleweed): install GTK4 dev libs + packaging tools.
+      # IMPORTANT: use `shell: sh` here — bash may not exist yet in a minimal
+      # openSUSE container. We install bash (and gcc) as part of this step.
       - name: ⚙️ Install build and packaging tools
+        shell: sh
         run: |
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             dnf install -y \
@@ -62,6 +65,8 @@ jobs:
           else
             zypper --non-interactive refresh
             zypper --non-interactive install -y \
+              bash \
+              gcc \
               gtk4-devel \
               wayland-devel \
               libX11-devel \
