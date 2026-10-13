@@ -65,8 +65,6 @@ jobs:
               findutils
           else
             dnf install -y \
-              gcc \
-              make \
               gtk4-devel \
               wayland-devel \
               libX11-devel \
@@ -75,6 +73,12 @@ jobs:
               openssl-devel \
               findutils
           fi
+
+      # ── Linker ───────────────────────────────────────────────────────────
+      # setup-mold installs mold (faster linker) and the C toolchain it
+      # needs, replacing cc/gcc as a dependency in the install step above.
+      - name: ⚡ Set up mold linker
+        uses: rui314/setup-mold@v1
 
       # ── Rust toolchain ────────────────────────────────────────────────────
       - name: 🦀 Set up Rust (stable)
