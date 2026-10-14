@@ -15,7 +15,23 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 * **Unsupported formats:** This app only support formats which image crate supports, in this reason, other formats such as HEIC are currently not supported
 
 ## Installation
-Stay tuned.
+### Ubuntu (or other Debian-based distro)
+Download package from [release page](https://github.com/Kayxue/nautilus-image-converter-reborn-app/releases), and install it by double clicking on it or through command below:
+```bash
+sudo apt install <path-to-deb-package>
+```
+
+### Fedora (or other RedHat-based distro)
+Download package from [release page](https://github.com/Kayxue/nautilus-image-converter-reborn-app/releases), and install it through command below:
+```bash
+sudo dnf install <path-to-rpm-package>
+```
+
+### Arch Linux (or other ArchLinux-based distro)
+First, clone this repository through Git CLI. Second, open terminal, `cd` into the folder and run command below:
+```bash
+makepkg -si
+```
 
 ## Architecture
 
