@@ -1,12 +1,11 @@
 # Nautilus Image Converter Reborn (App)
 
 Application part of Nautilus Image Converter Reborn, which can help you convert, resize, and rotate images.
+
+## Screenshots
 |Rotate Image|Resize Image|
 |-----|-----|
 |![](./static/screenshot1.png)|![](./static/screenshot2.png)|
-
-> [!NOTE]
-> Still under heavy development. Stay tuned.
 
 ## Features
 * **Standalone app:** It now becomes a standalone app, not binding to Nautilus File Manager anymore. However, you can still bind parent window via CLI arguments.
