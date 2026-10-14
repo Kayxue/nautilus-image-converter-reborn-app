@@ -20,6 +20,7 @@ rayon = "1.12.0"
 
 # ─── Debian packaging (cargo-deb) ────────────────────────────────────────────
 [package.metadata.deb]
+name = "nautilus-image-converter-reborn"
 maintainer = "Kay <s0990006@gmail.com>"
 copyright = "2026 Kay"
 license-file = ["LICENSE", "0"]
@@ -35,6 +36,7 @@ assets = [
 
 # ─── RPM packaging (cargo-generate-rpm) ──────────────────────────────────────
 [package.metadata.generate-rpm]
+name = "nautilus-image-converter-reborn"
 license = "MIT"
 assets = [
     { source = "target/release/nautilus_image_converter", dest = "/usr/bin/nautilus-image-converter", mode = "755" },
