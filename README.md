@@ -2,6 +2,10 @@
 
 Application part of Nautilus Image Converter Reborn, which can help you convert, resize, and rotate images.
 
+![](./static/screenshot1.png)
+
+![](./static/screenshot2.png)
+
 > [!NOTE]
 > Still under heavy development. Stay tuned.
 
@@ -35,7 +39,7 @@ makepkg -si
 
 ## Architecture
 
-![Architecture](https://github.com/Kayxue/nautilus-image-converter-reborn-app/blob/master/archtecture.png)
+![Architecture](./static/archtecture.png)
 
 ## Repository
 
