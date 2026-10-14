@@ -30,7 +30,11 @@ sudo dnf install <path-to-rpm-package>
 ```
 
 ### Arch Linux (or other ArchLinux-based distro)
-First, clone this repository through Git CLI. Second, open terminal, `cd` into the folder and run command below:
+First, clone the repository through Git CLI.
+```bash
+git clone https://github.com/Kayxue/nautilus-image-converter-reborn-app-arch.git
+```
+Second, open terminal, `cd` into the folder and run command below:
 ```bash
 makepkg -si
 ```
