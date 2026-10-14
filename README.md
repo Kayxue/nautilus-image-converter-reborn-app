@@ -13,6 +13,9 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 |-----|-----|
 |![](./static/screenshot1.png)|![](./static/screenshot2.png)|
 
+## Limitation
+* **Unsupported formats:** This app only supports formats supported by the image crate; formats such as HEIC are currently not supported.
+
 ## Installation
 ### Ubuntu (or other Debian-based distro)
 Download package from [release page](https://github.com/Kayxue/nautilus-image-converter-reborn-app/releases), and install it by double clicking on it or through command below:
@@ -31,9 +34,6 @@ First, clone this repository through Git CLI. Second, open terminal, `cd` into t
 ```bash
 makepkg -si
 ```
-
-## Limitation
-* **Unsupported formats:** This app only support formats which image crate supports, in this reason, other formats such as HEIC are currently not supported
 
 ## Architecture
 
