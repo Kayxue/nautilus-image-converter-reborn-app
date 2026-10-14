@@ -2,19 +2,16 @@
 
 Application part of Nautilus Image Converter Reborn, which can help you convert, resize, and rotate images.
 
-## Screenshots
-|Rotate Image|Resize Image|
-|-----|-----|
-|![](./static/screenshot1.png)|![](./static/screenshot2.png)|
-
 ## Features
 * **Standalone app:** It now becomes a standalone app, not binding to Nautilus File Manager anymore. However, you can still bind parent window via CLI arguments.
 * **Entirely in Rust:** No non-rust dependencies, which keeps this app performant, low memory footprint and stable.
 * **Parallelism:** Instead of processing images one by one, this app process images in parallel by rayon.
 * **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
-## Limitation
-* **Unsupported formats:** This app only support formats which image crate supports, in this reason, other formats such as HEIC are currently not supported
+## Screenshots
+|Rotate Image|Resize Image|
+|-----|-----|
+|![](./static/screenshot1.png)|![](./static/screenshot2.png)|
 
 ## Installation
 ### Ubuntu (or other Debian-based distro)
@@ -34,6 +31,9 @@ First, clone this repository through Git CLI. Second, open terminal, `cd` into t
 ```bash
 makepkg -si
 ```
+
+## Limitation
+* **Unsupported formats:** This app only support formats which image crate supports, in this reason, other formats such as HEIC are currently not supported
 
 ## Architecture
 
