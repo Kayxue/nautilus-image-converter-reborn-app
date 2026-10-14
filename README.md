@@ -9,7 +9,7 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 * **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
 ## Screenshots
-|Rotate Image|Resize Image|
+|Resize Image|Rotate Image|
 |-----|-----|
 |![](./static/screenshot1.png)|![](./static/screenshot2.png)|
 
