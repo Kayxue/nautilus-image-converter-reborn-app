@@ -1,4 +1,4 @@
-# Nautilus Image Converter Reborn (App)
+# Nautilus Image Converter Reborn - App
 
 Application part of Nautilus Image Converter Reborn, which can help you convert, resize, and rotate images.
 
