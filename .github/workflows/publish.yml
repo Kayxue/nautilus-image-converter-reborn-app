@@ -53,29 +53,19 @@ jobs:
         uses: actions/checkout@v7
 
       # Both containers are Fedora-based and use dnf.
-      # x86_64 (gtk4-rs): GTK4 already in the image; install packaging tools + gcc/mold.
-      # arm64  (fedora):  Install GTK4 dev libs, packaging tools + gcc/mold.
-      - name: ⚙️ Install build and packaging tools
+      # x86_64 (gtk4-rs): GTK4 dev libraries already in the image; install gcc and mold.
+      # arm64  (fedora):  Install GTK4 dev libraries (pulls in Wayland/X11 headers) + gcc and mold.
+      - name: ⚙️ Install build tools
         run: |
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             dnf install -y \
               gcc \
-              mold \
-              patchelf \
-              dpkg \
-              openssl-devel \
-              findutils
+              mold
           else
             dnf install -y \
               gcc \
               mold \
-              gtk4-devel \
-              wayland-devel \
-              libX11-devel \
-              patchelf \
-              dpkg \
-              openssl-devel \
-              findutils
+              gtk4-devel
           fi
 
       # ── Linker ───────────────────────────────────────────────────────────
