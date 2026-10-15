@@ -45,7 +45,7 @@ makepkg -si
 
 ## Repository
 
-* Extensions repository: Uninitialized.
+* Extensions repository: [Here](https://github.com/Kayxue/nautilus-image-converter-reborn-extension)
 * App repository: This repository
 
 ## Technology Stack (App part)
