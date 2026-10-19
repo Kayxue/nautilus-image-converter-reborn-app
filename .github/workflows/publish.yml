@@ -69,13 +69,15 @@ jobs:
           fi
 
       # ── Linker ───────────────────────────────────────────────────────────
-      # Make mold the default system linker (high performance drop-in replacement for ld).
+      # Tell rustc to ask gcc to link with mold explicitly. Overwriting /usr/bin/ld
+      # is unreliable: gcc's collect2 resolves ld via its own search paths
+      # (e.g. /usr/libexec/gcc/<triple>/..., <triple>-ld) and may bypass the symlink,
+      # which is what happens on the arm64 Fedora image.
       # gcc provides the C compiler (cc) needed by rustc and proc-macro build scripts.
       - name: ⚡ Set up mold linker
         run: |
-          ln -sf /usr/bin/mold "$(realpath /usr/bin/ld)"
-          ln -sf /usr/bin/mold /usr/bin/ld
           mold --version
+          echo "RUSTFLAGS=-C link-arg=-fuse-ld=mold" >> "$GITHUB_ENV"
 
       # ── Rust toolchain ────────────────────────────────────────────────────
       - name: 🦀 Set up Rust (stable)
