@@ -1,6 +1,6 @@
 [package]
 name = "nautilus_image_converter"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Standalone app to convert, resize, and rotate images — built with Rust and GTK4"
 
