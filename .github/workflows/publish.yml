@@ -60,12 +60,14 @@ jobs:
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             dnf install -y \
               gcc \
-              mold
+              mold \
+              libadwaita-devel
           else
             dnf install -y \
               gcc \
               mold \
-              gtk4-devel
+              gtk4-devel \
+              libadwaita-devel
           fi
 
       # ── Linker ───────────────────────────────────────────────────────────
