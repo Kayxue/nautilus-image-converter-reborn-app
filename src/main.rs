@@ -58,8 +58,8 @@ fn main() {
 
     let paths_buf: Vec<PathBuf> = paths.iter().map(|e| e.parse().unwrap()).collect();
 
-    if paths_buf.iter().any(|e| !e.exists()) {
-        eprintln!("Error: one or more input paths do not exist.");
+    if paths_buf.iter().any(|e| !e.exists() || !e.is_file()) {
+        eprintln!("Error: one or more input paths do not exist or are not files.");
         std::process::exit(1);
     }
 
