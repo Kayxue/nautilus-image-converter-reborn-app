@@ -666,6 +666,14 @@ impl SimpleComponent for ConvertBodyModel {
                             set_model: Some(&StringList::new(&["Individual formats", "Filename Patterns"])),
                         }
                     },
+
+                    // TODO: Conditional rendering based on what's in comboboxtext_custom_convert_mode.
+                    // Display a GtkListView with add/delete button below it.
+                    // For second column, display a dropdown to select image format.
+                    // For first column:
+                    // If the mode is "Individual formats": Display all file names in first column
+                    // else: Text input for Regex Pattern
+                    // If the mode is "Filename Patterns", first row need to be default format selection
                 }
             }
         }
