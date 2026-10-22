@@ -13,20 +13,7 @@ use crate::{
     },
 };
 
-pub struct ResizeBodyModel {
-    pub cur_percent: u8,
-    pub cur_width: u16,
-    pub cur_height: u16,
-    pub append: String,
-}
-
-#[derive(Debug)]
-pub enum ResizeBodyInput {
-    UpdateCurrentPercent(u8),
-    UpdateCurrentWidth(u16),
-    UpdateCurrentHeight(u16),
-    UpdateAppend(String),
-}
+pub struct ResizeBodyModel;
 
 #[derive(Debug)]
 pub enum ResizeBodyOutput {
@@ -51,7 +38,7 @@ const PRESET_SIZES: &[&str] = &[
 impl SimpleComponent for ResizeBodyModel {
     type Init = ();
 
-    type Input = ResizeBodyInput;
+    type Input = ();
     type Output = ResizeBodyOutput;
 
     view! {
@@ -110,8 +97,6 @@ impl SimpleComponent for ResizeBodyModel {
                                     let _ = custom_size_radiobutton.is_active();
                                     let idx = comboboxtext_size.selected() as usize;
                                     let (w, h) = parse_wh(PRESET_SIZES.get(idx).unwrap_or(&"0x0"));
-                                    sender.input(ResizeBodyInput::UpdateCurrentWidth(w as u16));
-                                    sender.input(ResizeBodyInput::UpdateCurrentHeight(h as u16));
                                     sender.output(ResizeBodyOutput::UpdateImageSize(
                                         ResizeKind::Custom(w, h),
                                     )).unwrap();
@@ -127,8 +112,6 @@ impl SimpleComponent for ResizeBodyModel {
                             connect_selected_notify[sender] => move |dd| {
                                 let idx = dd.selected() as usize;
                                 let (w, h) = parse_wh(PRESET_SIZES.get(idx).unwrap_or(&"0x0"));
-                                sender.input(ResizeBodyInput::UpdateCurrentWidth(w as u16));
-                                sender.input(ResizeBodyInput::UpdateCurrentHeight(h as u16));
                                 sender.output(ResizeBodyOutput::UpdateImageSize(
                                     ResizeKind::Custom(w, h),
                                 )).unwrap();
@@ -160,7 +143,6 @@ impl SimpleComponent for ResizeBodyModel {
                                     width_spinbutton.set_sensitive(false);
                                     height_spinbutton.set_sensitive(false);
                                     let pct = pct_spinbutton.value() as u8;
-                                    sender.input(ResizeBodyInput::UpdateCurrentPercent(pct));
                                     sender.output(ResizeBodyOutput::UpdateImageSize(
                                         ResizeKind::Percentage(pct as f32 / 100.0),
                                     )).unwrap();
@@ -176,7 +158,6 @@ impl SimpleComponent for ResizeBodyModel {
                             set_numeric: true,
                             connect_value_changed[sender] => move |spin| {
                                 let pct = spin.value() as u8;
-                                sender.input(ResizeBodyInput::UpdateCurrentPercent(pct));
                                 sender.output(ResizeBodyOutput::UpdateImageSize(
                                     ResizeKind::Percentage(pct as f32 / 100.0),
                                 )).unwrap();
@@ -208,8 +189,6 @@ impl SimpleComponent for ResizeBodyModel {
                                     comboboxtext_size.set_sensitive(false);
                                     let w = width_spinbutton.value() as u32;
                                     let h = height_spinbutton.value() as u32;
-                                    sender.input(ResizeBodyInput::UpdateCurrentWidth(w as u16));
-                                    sender.input(ResizeBodyInput::UpdateCurrentHeight(h as u16));
                                     sender.output(ResizeBodyOutput::UpdateImageSize(
                                         ResizeKind::Custom(w, h),
                                     )).unwrap();
@@ -232,7 +211,6 @@ impl SimpleComponent for ResizeBodyModel {
                             connect_value_changed[sender, height_spinbutton] => move |spin| {
                                 let w = spin.value() as u32;
                                 let h = height_spinbutton.value() as u32;
-                                sender.input(ResizeBodyInput::UpdateCurrentWidth(w as u16));
                                 sender.output(ResizeBodyOutput::UpdateImageSize(
                                     ResizeKind::Custom(w, h),
                                 )).unwrap();
@@ -254,7 +232,6 @@ impl SimpleComponent for ResizeBodyModel {
                             connect_value_changed[sender, width_spinbutton] => move |spin| {
                                 let h = spin.value() as u32;
                                 let w = width_spinbutton.value() as u32;
-                                sender.input(ResizeBodyInput::UpdateCurrentHeight(h as u16));
                                 sender.output(ResizeBodyOutput::UpdateImageSize(
                                     ResizeKind::Custom(w, h),
                                 )).unwrap();
@@ -308,7 +285,6 @@ impl SimpleComponent for ResizeBodyModel {
                                 if btn.is_active() {
                                     name_entry.set_sensitive(true);
                                     let text = name_entry.text().to_string();
-                                    sender.input(ResizeBodyInput::UpdateAppend(text.clone()));
                                     sender.output(ResizeBodyOutput::UpdateOutputMode(
                                         OutputMode::NewFile(text),
                                     )).unwrap();
@@ -323,7 +299,6 @@ impl SimpleComponent for ResizeBodyModel {
                             set_activates_default: true,
                             connect_changed[sender] => move |entry| {
                                 let text = entry.text().to_string();
-                                sender.input(ResizeBodyInput::UpdateAppend(text.clone()));
                                 sender.output(ResizeBodyOutput::UpdateOutputMode(
                                     OutputMode::NewFile(text),
                                 )).unwrap();
@@ -362,44 +337,15 @@ impl SimpleComponent for ResizeBodyModel {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = ResizeBodyModel {
-            cur_percent: 50,
-            cur_width: 1000,
-            cur_height: 1000,
-            append: ".resized".to_owned(),
-        };
+        let model = ResizeBodyModel;
 
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
-
-    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
-        match message {
-            ResizeBodyInput::UpdateAppend(append) => {
-                self.append = append;
-            }
-            ResizeBodyInput::UpdateCurrentPercent(percent) => self.cur_percent = percent,
-            ResizeBodyInput::UpdateCurrentHeight(height) => {
-                self.cur_height = height;
-            }
-            ResizeBodyInput::UpdateCurrentWidth(width) => {
-                self.cur_width = width;
-            }
-        };
-    }
 }
 
-pub struct RotateBodyModel {
-    pub custom_angle: u8,
-    pub append: String,
-}
-
-#[derive(Debug)]
-pub enum RotateBodyInput {
-    UpdateCustomAngle(u8),
-    UpdateAppend(String),
-}
+pub struct RotateBodyModel;
 
 #[derive(Debug)]
 pub enum RotateBodyOutput {
@@ -420,7 +366,7 @@ fn angle_kind_from_index(idx: u32) -> RotationAngleKind {
 impl SimpleComponent for RotateBodyModel {
     type Init = ();
 
-    type Input = RotateBodyInput;
+    type Input = ();
     type Output = RotateBodyOutput;
 
     view! {
@@ -507,7 +453,6 @@ impl SimpleComponent for RotateBodyModel {
                                     angle_spinbutton.set_sensitive(true);
                                     angle_combobox.set_sensitive(false);
                                     let deg = angle_spinbutton.value() as u32;
-                                    sender.input(RotateBodyInput::UpdateCustomAngle(deg as u8));
                                     sender.output(RotateBodyOutput::UpdateAngle(
                                         RotationAngle::Custom(deg),
                                     )).unwrap();
@@ -524,7 +469,6 @@ impl SimpleComponent for RotateBodyModel {
                             set_numeric: true,
                             connect_value_changed[sender] => move |spin| {
                                 let deg = spin.value() as u32;
-                                sender.input(RotateBodyInput::UpdateCustomAngle(deg as u8));
                                 sender.output(RotateBodyOutput::UpdateAngle(
                                     RotationAngle::Custom(deg),
                                 )).unwrap();
@@ -577,7 +521,6 @@ impl SimpleComponent for RotateBodyModel {
                                 if btn.is_active() {
                                     name_entry.set_sensitive(true);
                                     let text = name_entry.text().to_string();
-                                    sender.input(RotateBodyInput::UpdateAppend(text.clone()));
                                     sender.output(RotateBodyOutput::UpdateOutputMode(
                                         OutputMode::NewFile(text),
                                     )).unwrap();
@@ -591,7 +534,6 @@ impl SimpleComponent for RotateBodyModel {
                             set_text: ".rotated",
                             connect_changed[sender] => move |entry| {
                                 let text = entry.text().to_string();
-                                sender.input(RotateBodyInput::UpdateAppend(text.clone()));
                                 sender.output(RotateBodyOutput::UpdateOutputMode(
                                     OutputMode::NewFile(text),
                                 )).unwrap();
@@ -630,32 +572,15 @@ impl SimpleComponent for RotateBodyModel {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = RotateBodyModel {
-            custom_angle: 90,
-            append: ".rotated".to_owned(),
-        };
+        let model = RotateBodyModel;
 
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
-
-    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
-        match message {
-            RotateBodyInput::UpdateAppend(append) => {
-                self.append = append;
-            }
-            RotateBodyInput::UpdateCustomAngle(angle) => {
-                self.custom_angle = angle;
-            }
-        }
-    }
 }
 
 pub struct ConvertBodyModel {}
-
-#[derive(Debug)]
-pub enum ConvertBodyInput {}
 
 #[derive(Debug)]
 pub enum ConvertBodyOutput {}
@@ -664,7 +589,7 @@ pub enum ConvertBodyOutput {}
 impl SimpleComponent for ConvertBodyModel {
     type Init = ();
 
-    type Input = ConvertBodyInput;
+    type Input = ();
     type Output = ConvertBodyOutput;
 
     view! {
@@ -689,9 +614,5 @@ impl SimpleComponent for ConvertBodyModel {
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
-    }
-
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
-        todo!()
     }
 }
