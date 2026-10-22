@@ -651,3 +651,47 @@ impl SimpleComponent for RotateBodyModel {
         }
     }
 }
+
+pub struct ConvertBodyModel {}
+
+#[derive(Debug)]
+pub enum ConvertBodyInput {}
+
+#[derive(Debug)]
+pub enum ConvertBodyOutput {}
+
+#[component(pub)]
+impl SimpleComponent for ConvertBodyModel {
+    type Init = ();
+
+    type Input = ConvertBodyInput;
+    type Output = ConvertBodyOutput;
+
+    view! {
+        #[root]
+        #[name(vbox1)]
+        Box {
+            set_hexpand: true,
+            set_vexpand: false,
+            set_orientation: Orientation::Vertical,
+            set_margin_all: 12,
+            set_spacing: 12,
+        }
+    }
+
+    fn init(
+        init: Self::Init,
+        root: Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = ConvertBodyModel {};
+
+        let widgets = view_output!();
+
+        ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+        todo!()
+    }
+}
