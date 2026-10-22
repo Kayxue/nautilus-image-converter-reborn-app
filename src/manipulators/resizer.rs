@@ -10,6 +10,7 @@ pub enum ResizeKind {
     Custom(u32, u32),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct ResizerConfig(pub ResizeKind);
 
 pub struct Resizer(pub ResizerConfig);

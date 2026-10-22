@@ -3,6 +3,7 @@ use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
 };
+use strum_macros::Display;
 
 use anyhow::{Context, Result};
 use gtk::{
@@ -16,10 +17,12 @@ use relm4::{
     SimpleComponent, component, main_application,
 };
 
+use crate::window::ConfigType::Rotate;
 use crate::{
     Mode, OutputMode,
     manipulators::{
         Manipulator,
+        converter::{Converter, ConverterConfig},
         resizer::{ResizeKind, Resizer, ResizerConfig},
         rotator::{RotationAngle, RotationAngleKind, Rotator, RotatorConfig},
     },
@@ -37,10 +40,26 @@ pub struct Initializer {
     pub parent_handle: Option<String>,
 }
 
+#[derive(Display)]
+#[strum(serialize_all = "title_case")]
+pub enum ConfigType {
+    Rotate(RotatorConfig),
+    Resize(ResizerConfig),
+    Convert(ConverterConfig),
+}
+
+impl Into<ConfigType> for Mode {
+    fn into(self) -> ConfigType {
+        match self {
+            Mode::Resize => todo!(),
+            Mode::Rotate => todo!(),
+            Mode::Convert => todo!(),
+        }
+    }
+}
+
 pub struct GeneralConfig {
-    pub mode: Mode,
-    pub rotation_angle: Option<RotationAngle>,
-    pub image_size: Option<ResizeKind>,
+    pub config: ConfigType,
     pub output_mode: OutputMode,
 }
 
@@ -136,7 +155,7 @@ impl SimpleComponent for AppModel {
     view! {
         #[root]
         Window {
-            set_title: Some(&format!("{} Images", model.general_config.mode)),
+            set_title: Some(&format!("{} Images", model.general_config.config)),
             set_titlebar: Some(model.header.widget()),
             set_resizable: false,
             set_default_width: 440,
@@ -221,9 +240,7 @@ impl SimpleComponent for AppModel {
                 let widget = resize_body.widget().clone();
                 let model = AppModel {
                     general_config: GeneralConfig {
-                        mode: Mode::Resize,
-                        rotation_angle: None,
-                        image_size: Some(ResizeKind::Percentage(0.5)),
+                        config: ConfigType::Resize(ResizerConfig(ResizeKind::Percentage(0.5))),
                         output_mode: OutputMode::NewFile(".resized".to_owned()),
                     },
                     header,
@@ -247,9 +264,9 @@ impl SimpleComponent for AppModel {
                 let widget = rotate_body.widget().clone();
                 let model = AppModel {
                     general_config: GeneralConfig {
-                        mode: Mode::Rotate,
-                        rotation_angle: Some(RotationAngle::Specific(RotationAngleKind::Ninety)),
-                        image_size: None,
+                        config: Rotate(RotatorConfig(RotationAngle::Specific(
+                            RotationAngleKind::Ninety,
+                        ))),
                         output_mode: OutputMode::NewFile(".rotated".to_owned()),
                     },
                     header,
@@ -310,27 +327,11 @@ impl SimpleComponent for AppModel {
                 // Disable header buttons while processing
                 self.header.widget().set_sensitive(false);
 
-                let manipulator: Arc<dyn Manipulator> = match self.general_config.mode {
-                    Mode::Resize => {
-                        let kind = self
-                            .general_config
-                            .image_size
-                            .unwrap_or(ResizeKind::Percentage(0.5));
-                        Arc::new(Resizer(ResizerConfig(kind)))
-                    }
-                    Mode::Rotate => {
-                        let angle = self
-                            .general_config
-                            .rotation_angle
-                            .unwrap_or(RotationAngle::Specific(RotationAngleKind::Ninety));
-                        Arc::new(Rotator(RotatorConfig(angle)))
-                    }
-                    Mode::Convert => {
-                        eprintln!(
-                            "[nautilus-image-converter] Convert mode is not yet implemented."
-                        );
-                        main_application().quit();
-                        return;
+                let manipulator: Arc<dyn Manipulator> = match &self.general_config.config {
+                    ConfigType::Resize(resize_config) => Arc::new(Resizer(*resize_config)),
+                    ConfigType::Rotate(rotate_config) => Arc::new(Rotator(*rotate_config)),
+                    ConfigType::Convert(convert_config) => {
+                        Arc::new(Converter(convert_config.clone()))
                     }
                 };
 
@@ -367,10 +368,14 @@ impl SimpleComponent for AppModel {
                 main_application().quit();
             }
             AppInput::UpdateAngle(angle) => {
-                self.general_config.rotation_angle = Some(angle);
+                if let ConfigType::Rotate(rotate_config) = &mut self.general_config.config {
+                    rotate_config.0 = angle;
+                }
             }
             AppInput::UpdateImageSize(size) => {
-                self.general_config.image_size = Some(size);
+                if let ConfigType::Resize(resize_config) = &mut self.general_config.config {
+                    resize_config.0 = size;
+                }
             }
             AppInput::UpdateOutputMode(mode) => {
                 self.general_config.output_mode = mode;
@@ -399,7 +404,8 @@ pub(crate) fn process_single_image(
         .manipulate_next_image(img)
         .with_context(|| format!("Failed to manipulate image: {:?}", path))?;
 
-    let dest = destination_path(path, output_mode);
+    let target_ext = manipulator.target_extension(path);
+    let dest = destination_path_with_ext(path, output_mode, target_ext.as_deref());
 
     save_image(&manipulated, &dest)?;
 
@@ -408,15 +414,28 @@ pub(crate) fn process_single_image(
 }
 
 pub(crate) fn destination_path(original: &Path, output_mode: &OutputMode) -> PathBuf {
+    destination_path_with_ext(original, output_mode, None)
+}
+
+/// Like [`destination_path`], but replaces the file extension with
+/// `target_ext` when given (used for format conversion).
+pub(crate) fn destination_path_with_ext(
+    original: &Path,
+    output_mode: &OutputMode,
+    target_ext: Option<&str>,
+) -> PathBuf {
     match output_mode {
-        OutputMode::InPlace => original.to_path_buf(),
+        OutputMode::InPlace => match target_ext {
+            Some(ext) => original.with_extension(ext),
+            None => original.to_path_buf(),
+        },
         OutputMode::NewFile(suffix) => {
             let parent = original.parent().unwrap_or_else(|| Path::new(""));
             let file_stem = original
                 .file_stem()
                 .and_then(|s| s.to_str())
                 .unwrap_or("image");
-            let extension = original.extension().and_then(|e| e.to_str());
+            let extension = target_ext.or_else(|| original.extension().and_then(|e| e.to_str()));
             let new_filename = match extension {
                 Some(ext) => format!("{}{}.{}", file_stem, suffix, ext),
                 None => format!("{}{}", file_stem, suffix),

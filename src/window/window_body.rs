@@ -3,6 +3,7 @@ use gtk::{
     StringList,
     prelude::{BoxExt, CheckButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt},
 };
+use image::ImageFormat;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, component};
 
 use crate::{
@@ -580,6 +581,15 @@ impl SimpleComponent for RotateBodyModel {
     }
 }
 
+/// All image formats that can be written, paired with their primary file
+/// extension. The index in this list matches the index in the dropdown.
+pub(crate) fn writable_formats() -> Vec<(ImageFormat, &'static str)> {
+    ImageFormat::all()
+        .filter(|f| f.writing_enabled())
+        .filter_map(|f| f.extensions_str().first().map(|ext| (f, *ext)))
+        .collect()
+}
+
 pub struct ConvertBodyModel {}
 
 #[derive(Debug)]
@@ -601,6 +611,63 @@ impl SimpleComponent for ConvertBodyModel {
             set_orientation: Orientation::Vertical,
             set_margin_all: 12,
             set_spacing: 12,
+
+            #[name(vbox2)]
+            Box {
+                set_hexpand: true,
+                set_orientation: Orientation::Vertical,
+                set_spacing: 6,
+
+                #[name(hbox1)]
+                Box {
+                    set_valign: Align::Center,
+                    set_spacing: 6,
+
+                    #[name(convert_all_radiobutton)]
+                    CheckButton {
+                        set_halign: Align::Center,
+                        set_label: Some("Convert all images to"),
+                        set_use_underline: true,
+
+                    },
+
+                    #[name(comboboxtext_format)]
+                    DropDown {
+                        set_hexpand: true,
+                        set_sensitive: false,
+                        set_model: Some(&StringList::new(
+                            &writable_formats().iter().map(|(_, ext)| *ext).collect::<Vec<_>>(),
+                        )),
+                    },
+                },
+
+                #[name(hbox2)]
+                Box {
+                    set_orientation: Orientation::Vertical,
+                    set_spacing: 6,
+
+                    #[name(hbox3)]
+                    Box {
+                        set_valign: Align::Center,
+                        set_spacing: 6,
+
+                        #[name(custom_convert_radiobutton)]
+                        CheckButton {
+                            set_halign: Align::Center,
+                            set_label: Some("Convert images based on "),
+                            set_use_underline: true,
+
+                        },
+
+                        #[name(comboboxtext_custom_convert_mode)]
+                        DropDown {
+                            set_hexpand: true,
+                            set_sensitive: false,
+                            set_model: Some(&StringList::new(&["Individual formats", "Filename Patterns"])),
+                        }
+                    },
+                }
+            }
         }
     }
 

@@ -20,6 +20,7 @@ pub enum RotationAngle {
     Custom(u32),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct RotatorConfig(pub RotationAngle);
 
 pub struct Rotator(pub RotatorConfig);
