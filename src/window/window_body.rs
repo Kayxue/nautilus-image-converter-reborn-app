@@ -590,7 +590,7 @@ pub(crate) fn writable_formats() -> Vec<(ImageFormat, &'static str)> {
         .collect()
 }
 
-pub struct ConvertBodyModel {}
+pub struct ConvertBodyModel;
 
 #[derive(Debug)]
 pub enum ConvertBodyOutput {}
