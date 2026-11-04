@@ -12,6 +12,9 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 |Resize Image|Rotate Image|
 |-----|-----|
 |![](./static/screenshot1.png)|![](./static/screenshot2.png)|
+|Convert Image|
+|-----|
+|![](./static/screenshot3.png)|
 
 ## Limitation
 * **Unsupported formats:** This app only supports formats supported by the image crate; formats such as HEIC are currently not supported.
