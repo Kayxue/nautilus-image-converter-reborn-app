@@ -39,6 +39,9 @@ Second, open terminal, `cd` into the folder and run command below:
 makepkg -si
 ```
 
+> [!NOTE]
+> Becuase AUR account registration service is currently unavailable, I can't push it to AUR. If you have an account, feel free to push it and open an issue to tell me.
+
 ## Architecture
 
 ![Architecture](./static/archtecture.png)
