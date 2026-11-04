@@ -66,7 +66,7 @@ makepkg -si
 - [X] Advanced image rotation (rotate image for arbitrary angle) using imageproc
 - [X] Top window detection
 - [X] GUI
-- [ ] Image conversion
+- [X] Image conversion
 - [ ] Better error handling
 - [ ] (if possible) Rewrite extension part using Rust.
 - [ ] (if possible) Merge nautilus-extension part into this repo.
