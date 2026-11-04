@@ -29,23 +29,15 @@ impl Manipulator for Rotator {
     fn manipulate_next_image(&self, image: DynamicImage) -> Result<DynamicImage> {
         let RotatorConfig(angle) = &self.0;
         match angle {
-            RotationAngle::Specific(kind) => self.rotate_image_specific(image, &kind),
-            RotationAngle::Custom(deg) => {
-                if *deg == 0 {
-                    return Ok(image);
-                }
-                if *deg % 90 == 0 {
-                    return match *deg / 90 {
-                        1 => self.rotate_image_specific(image, &RotationAngleKind::Ninety),
-                        2 => self.rotate_image_specific(image, &RotationAngleKind::HundredEighty),
-                        3 => {
-                            self.rotate_image_specific(image, &RotationAngleKind::TwoHundredSeventy)
-                        }
-                        _ => Ok(image),
-                    };
-                }
-                self.rotate_image_custom(image, *deg)
-            }
+            RotationAngle::Specific(kind) => self.rotate_image_specific(image, kind),
+            // Multiples of 90° use the lossless fast path.
+            RotationAngle::Custom(deg) => match deg % 360 {
+                0 => Ok(image),
+                90 => self.rotate_image_specific(image, &RotationAngleKind::Ninety),
+                180 => self.rotate_image_specific(image, &RotationAngleKind::HundredEighty),
+                270 => self.rotate_image_specific(image, &RotationAngleKind::TwoHundredSeventy),
+                deg => self.rotate_image_custom(image, deg),
+            },
         }
     }
 }

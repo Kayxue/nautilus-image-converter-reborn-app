@@ -1227,7 +1227,6 @@ dependencies = [
  "rayon",
  "relm4",
  "strum_macros",
- "thiserror",
 ]
 
 [[package]]

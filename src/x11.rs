@@ -71,8 +71,10 @@ pub fn bind_transient_to_parent(window: &Window, parent_xid: u64) {
             parent_surf.connect_mapped_notify(move |surf| {
                 if !surf.is_mapped() {
                     // Parent window has gone away — decouple our window.
+                    // Pointing WM_TRANSIENT_FOR at the root window is the
+                    // ICCCM §4.1.2.6 way to say "no parent".
                     unsafe {
-                        clear_transient_for_xlib(
+                        set_transient_for_xlib(
                             &display_clone,
                             our_surf_clone.xid() as u64,
                             display_clone.xrootwindow() as u64,
@@ -96,22 +98,6 @@ unsafe fn set_transient_for_xlib(display: &X11Display, our_xid: u64, parent_xid:
             xdisplay,
             our_xid as std::os::raw::c_ulong,
             parent_xid as std::os::raw::c_ulong,
-        );
-    }
-}
-
-/// Clears the `WM_TRANSIENT_FOR` hint by pointing it at `root_xid` (the
-/// ICCCM §4.1.2.6 way to say "no parent").
-///
-/// # Safety
-/// Same requirements as [`set_transient_for_xlib`].
-unsafe fn clear_transient_for_xlib(display: &X11Display, our_xid: u64, root_xid: u64) {
-    let xdisplay = unsafe { display.xdisplay() } as *mut std::ffi::c_void;
-    unsafe {
-        XSetTransientForHint(
-            xdisplay,
-            our_xid as std::os::raw::c_ulong,
-            root_xid as std::os::raw::c_ulong,
         );
     }
 }

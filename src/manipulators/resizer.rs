@@ -1,7 +1,7 @@
 use super::Manipulator;
 use anyhow::{Context, Result};
 use fast_image_resize::Resizer as FIRResizer;
-use fast_image_resize::{IntoImageView, images::Image};
+use fast_image_resize::{IntoImageView, PixelType, images::Image};
 use image::{DynamicImage, ImageBuffer};
 
 #[derive(Debug, Clone, Copy)]
@@ -26,32 +26,24 @@ impl Manipulator for Resizer {
             }
             ResizeKind::Custom(w, h) => (*w, *h),
         };
-        let mut dst_image = Image::new(width, height, image.pixel_type().unwrap());
+        let pixel_type = image
+            .pixel_type()
+            .context("Unsupported pixel type for resizing")?;
+        let mut dst_image = Image::new(width, height, pixel_type);
 
         let mut resizer = FIRResizer::new();
-        resizer.resize(&image, &mut dst_image, None).unwrap();
+        resizer
+            .resize(&image, &mut dst_image, None)
+            .context("Failed to resize image")?;
 
-        let pixel_type = dst_image.pixel_type();
         let raw_buffer = dst_image.into_vec();
-
-        match pixel_type {
-            fast_image_resize::PixelType::U8x4 => {
-                let buffer = ImageBuffer::from_raw(width, height, raw_buffer)
-                    .with_context(|| "Failed to create RGBA8 image buffer")?;
-                Ok(DynamicImage::ImageRgba8(buffer))
-            }
-            fast_image_resize::PixelType::U8x3 => {
-                let buffer = ImageBuffer::from_raw(width, height, raw_buffer)
-                    .with_context(|| "Failed to create RGB8 image buffer")?;
-                Ok(DynamicImage::ImageRgb8(buffer))
-            }
-            fast_image_resize::PixelType::U8 => {
-                let buffer = ImageBuffer::from_raw(width, height, raw_buffer)
-                    .with_context(|| "Failed to create Luma8 image buffer")?;
-                Ok(DynamicImage::ImageLuma8(buffer))
-            }
+        let resized = match pixel_type {
+            PixelType::U8x4 => ImageBuffer::from_raw(width, height, raw_buffer).map(DynamicImage::ImageRgba8),
+            PixelType::U8x3 => ImageBuffer::from_raw(width, height, raw_buffer).map(DynamicImage::ImageRgb8),
+            PixelType::U8 => ImageBuffer::from_raw(width, height, raw_buffer).map(DynamicImage::ImageLuma8),
             // Handle other variants (U16, F32, etc.) as needed
-            _ => Err(anyhow::anyhow!("Unsupported pixel type")),
-        }
+            _ => return Err(anyhow::anyhow!("Unsupported pixel type")),
+        };
+        resized.context("Failed to create image buffer")
     }
 }

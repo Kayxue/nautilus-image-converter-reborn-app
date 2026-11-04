@@ -6,6 +6,7 @@ use strum_macros::Display;
 use crate::window::{AppModel, Initializer};
 
 mod manipulators;
+mod output;
 mod window;
 mod x11;
 
@@ -20,12 +21,6 @@ pub enum Mode {
     Convert,
 }
 
-#[derive(Debug, Clone)]
-pub enum OutputMode {
-    InPlace,
-    NewFile(String),
-}
-
 #[derive(FromArgs)]
 /// A image tool that can resize, rotate, and convert images.
 struct Args {
@@ -34,7 +29,7 @@ struct Args {
     mode: Mode,
     /// paths to the input image files.
     #[argh(positional)]
-    paths: Vec<String>,
+    paths: Vec<PathBuf>,
     /// XID of the parent (Nautilus) window to set as transient-for (X11 only).
     #[argh(option)]
     parent_xid: Option<u64>,
@@ -56,9 +51,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    let paths_buf: Vec<PathBuf> = paths.iter().map(|e| e.parse().unwrap()).collect();
-
-    if paths_buf.iter().any(|e| !e.exists() || !e.is_file()) {
+    if paths.iter().any(|e| !e.is_file()) {
         eprintln!("Error: one or more input paths do not exist or are not files.");
         std::process::exit(1);
     }

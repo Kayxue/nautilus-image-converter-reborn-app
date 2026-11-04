@@ -1,3 +1,4 @@
+use image::ImageFormat;
 use std::path::{Path, PathBuf};
 use std::sync::{
     Arc,
@@ -17,30 +18,33 @@ use relm4::{
     SimpleComponent, component, main_application,
 };
 
-use crate::window::ConfigType::Rotate;
 use crate::{
-    Mode, OutputMode,
+    Mode,
     manipulators::{
         Manipulator,
         converter::{Converter, ConverterConfig},
         resizer::{ResizeKind, Resizer, ResizerConfig},
         rotator::{RotationAngle, RotationAngleKind, Rotator, RotatorConfig},
     },
-    window::window_body::{ResizeBodyModel, ResizeBodyOutput, RotateBodyModel, RotateBodyOutput},
+    output::{OutputMode, save_image},
+    window::window_body::{BodyOutput, ConvertBodyModel, ResizeBodyModel, RotateBodyModel},
 };
 
 mod window_body;
 
+#[cfg(test)]
+pub(crate) use window_body::writable_formats;
+
 pub struct Initializer {
     pub mode: Mode,
-    pub paths: Vec<String>,
+    pub paths: Vec<PathBuf>,
     /// XID of the parent (Nautilus) window passed by the extension (X11 only).
     pub parent_xid: Option<u64>,
     /// Exported handle token of the parent (Nautilus) window (Wayland XDG Foreign).
     pub parent_handle: Option<String>,
 }
 
-#[derive(Display)]
+#[derive(Debug, Display)]
 #[strum(serialize_all = "title_case")]
 pub enum ConfigType {
     Rotate(RotatorConfig),
@@ -48,12 +52,14 @@ pub enum ConfigType {
     Convert(ConverterConfig),
 }
 
-impl Into<ConfigType> for Mode {
-    fn into(self) -> ConfigType {
-        match self {
-            Mode::Resize => todo!(),
-            Mode::Rotate => todo!(),
-            Mode::Convert => todo!(),
+impl From<Mode> for ConfigType {
+    fn from(mode: Mode) -> Self {
+        match mode {
+            Mode::Resize => ConfigType::Resize(ResizerConfig(ResizeKind::Percentage(0.5))),
+            Mode::Rotate => ConfigType::Rotate(RotatorConfig(RotationAngle::Specific(
+                RotationAngleKind::Ninety,
+            ))),
+            Mode::Convert => ConfigType::Convert(ConverterConfig(ImageFormat::Png)),
         }
     }
 }
@@ -121,12 +127,13 @@ impl SimpleComponent for HeaderModel {
 enum BodyController {
     Resize(Controller<ResizeBodyModel>),
     Rotate(Controller<RotateBodyModel>),
+    Convert(Controller<ConvertBodyModel>),
 }
 
 pub struct AppModel {
     general_config: GeneralConfig,
     header: Controller<HeaderModel>,
-    paths: Vec<String>,
+    paths: Vec<PathBuf>,
     is_processing: bool,
     processed_count: usize,
     total_count: usize,
@@ -138,11 +145,19 @@ pub struct AppModel {
 pub enum AppInput {
     Cancel,
     Execute,
-    UpdateImageSize(ResizeKind),
-    UpdateAngle(RotationAngle),
+    UpdateConfig(ConfigType),
     UpdateOutputMode(OutputMode),
     ProgressStep(usize),
     Finished,
+}
+
+impl From<BodyOutput> for AppInput {
+    fn from(output: BodyOutput) -> Self {
+        match output {
+            BodyOutput::UpdateConfig(config) => AppInput::UpdateConfig(config),
+            BodyOutput::UpdateOutputMode(mode) => AppInput::UpdateOutputMode(mode),
+        }
+    }
 }
 
 #[component(pub)]
@@ -227,58 +242,52 @@ impl SimpleComponent for AppModel {
                 HeaderOutput::Proceed => AppInput::Execute,
             });
 
-        let (body_widget, model) = match init.mode {
-            Mode::Resize => {
-                let resize_body: Controller<ResizeBodyModel> = ResizeBodyModel::builder()
-                    .launch(())
-                    .forward(sender.input_sender(), |msg| match msg {
-                        ResizeBodyOutput::UpdateImageSize(kind) => AppInput::UpdateImageSize(kind),
-                        ResizeBodyOutput::UpdateOutputMode(mode) => {
-                            AppInput::UpdateOutputMode(mode)
-                        }
-                    });
-                let widget = resize_body.widget().clone();
-                let model = AppModel {
-                    general_config: GeneralConfig {
-                        config: ConfigType::Resize(ResizerConfig(ResizeKind::Percentage(0.5))),
-                        output_mode: OutputMode::NewFile(".resized".to_owned()),
-                    },
-                    header,
-                    paths: init.paths.clone(),
-                    is_processing: false,
-                    processed_count: 0,
-                    total_count: init.paths.len(),
-                    _body: BodyController::Resize(resize_body),
-                };
-                (widget, model)
+        let config: ConfigType = init.mode.clone().into();
+
+        // Launch the mode-specific body. The default output mode must match
+        // the initial state of the body's radio buttons.
+        let input = sender.input_sender();
+        let (body_widget, body, output_mode) = match &config {
+            ConfigType::Resize(_) => {
+                let body = ResizeBodyModel::builder().launch(()).forward(input, AppInput::from);
+                (
+                    body.widget().clone(),
+                    BodyController::Resize(body),
+                    OutputMode::NewFile(".resized".to_owned()),
+                )
             }
-            Mode::Rotate => {
-                let rotate_body: Controller<RotateBodyModel> = RotateBodyModel::builder()
-                    .launch(())
-                    .forward(sender.input_sender(), |msg| match msg {
-                        RotateBodyOutput::UpdateAngle(angle) => AppInput::UpdateAngle(angle),
-                        RotateBodyOutput::UpdateOutputMode(mode) => {
-                            AppInput::UpdateOutputMode(mode)
-                        }
-                    });
-                let widget = rotate_body.widget().clone();
-                let model = AppModel {
-                    general_config: GeneralConfig {
-                        config: Rotate(RotatorConfig(RotationAngle::Specific(
-                            RotationAngleKind::Ninety,
-                        ))),
-                        output_mode: OutputMode::NewFile(".rotated".to_owned()),
-                    },
-                    header,
-                    paths: init.paths.clone(),
-                    is_processing: false,
-                    processed_count: 0,
-                    total_count: init.paths.len(),
-                    _body: BodyController::Rotate(rotate_body),
-                };
-                (widget, model)
+            ConfigType::Rotate(_) => {
+                let body = RotateBodyModel::builder().launch(()).forward(input, AppInput::from);
+                (
+                    body.widget().clone(),
+                    BodyController::Rotate(body),
+                    OutputMode::NewFile(".rotated".to_owned()),
+                )
             }
-            Mode::Convert => todo!(),
+            ConfigType::Convert(ConverterConfig(format)) => {
+                let body = ConvertBodyModel::builder()
+                    .launch(*format)
+                    .forward(input, AppInput::from);
+                (
+                    body.widget().clone(),
+                    BodyController::Convert(body),
+                    // "Keep original file(s)" is selected by default.
+                    OutputMode::NewFile(String::new()),
+                )
+            }
+        };
+
+        let model = AppModel {
+            general_config: GeneralConfig {
+                config,
+                output_mode,
+            },
+            header,
+            total_count: init.paths.len(),
+            paths: init.paths,
+            is_processing: false,
+            processed_count: 0,
+            _body: body,
         };
 
         let widgets = view_output!();
@@ -321,8 +330,6 @@ impl SimpleComponent for AppModel {
                     return;
                 }
                 self.is_processing = true;
-                self.processed_count = 0;
-                self.total_count = self.paths.len();
 
                 // Disable header buttons while processing
                 self.header.widget().set_sensitive(false);
@@ -344,12 +351,11 @@ impl SimpleComponent for AppModel {
 
                     let completed_counter = AtomicUsize::new(0);
 
-                    paths.into_par_iter().for_each(|path_str| {
-                        let path = PathBuf::from(&path_str);
+                    paths.into_par_iter().for_each(|path| {
                         if let Err(e) = process_single_image(&path, &output_mode, &*manipulator) {
                             eprintln!(
-                                "[nautilus-image-converter] Error processing {}: {:?}",
-                                path_str, e
+                                "[nautilus-image-converter] Error processing {:?}: {:?}",
+                                path, e
                             );
                         }
                         let completed = completed_counter.fetch_add(1, Ordering::Relaxed) + 1;
@@ -367,15 +373,8 @@ impl SimpleComponent for AppModel {
             AppInput::Finished => {
                 main_application().quit();
             }
-            AppInput::UpdateAngle(angle) => {
-                if let ConfigType::Rotate(rotate_config) = &mut self.general_config.config {
-                    rotate_config.0 = angle;
-                }
-            }
-            AppInput::UpdateImageSize(size) => {
-                if let ConfigType::Resize(resize_config) = &mut self.general_config.config {
-                    resize_config.0 = size;
-                }
+            AppInput::UpdateConfig(config) => {
+                self.general_config.config = config;
             }
             AppInput::UpdateOutputMode(mode) => {
                 self.general_config.output_mode = mode;
@@ -405,61 +404,18 @@ pub(crate) fn process_single_image(
         .with_context(|| format!("Failed to manipulate image: {:?}", path))?;
 
     let target_ext = manipulator.target_extension(path);
-    let dest = destination_path_with_ext(path, output_mode, target_ext.as_deref());
+    let dest = output_mode.destination(path, target_ext.as_deref());
 
     save_image(&manipulated, &dest)?;
-
     println!("[nautilus-image-converter] Saved: {:?}", dest);
-    Ok(())
-}
 
-pub(crate) fn destination_path(original: &Path, output_mode: &OutputMode) -> PathBuf {
-    destination_path_with_ext(original, output_mode, None)
-}
-
-/// Like [`destination_path`], but replaces the file extension with
-/// `target_ext` when given (used for format conversion).
-pub(crate) fn destination_path_with_ext(
-    original: &Path,
-    output_mode: &OutputMode,
-    target_ext: Option<&str>,
-) -> PathBuf {
-    match output_mode {
-        OutputMode::InPlace => match target_ext {
-            Some(ext) => original.with_extension(ext),
-            None => original.to_path_buf(),
-        },
-        OutputMode::NewFile(suffix) => {
-            let parent = original.parent().unwrap_or_else(|| Path::new(""));
-            let file_stem = original
-                .file_stem()
-                .and_then(|s| s.to_str())
-                .unwrap_or("image");
-            let extension = target_ext.or_else(|| original.extension().and_then(|e| e.to_str()));
-            let new_filename = match extension {
-                Some(ext) => format!("{}{}.{}", file_stem, suffix, ext),
-                None => format!("{}{}", file_stem, suffix),
-            };
-            parent.join(new_filename)
-        }
+    // Only reached after a successful save, so the original is never lost.
+    if output_mode.removes_original(path, &dest) {
+        std::fs::remove_file(path)
+            .with_context(|| format!("Failed to remove original file: {:?}", path))?;
+        println!("[nautilus-image-converter] Removed original: {:?}", path);
     }
-}
 
-fn save_image(img: &image::DynamicImage, dest: &Path) -> Result<()> {
-    let ext = dest
-        .extension()
-        .and_then(|s| s.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-
-    if (ext == "jpg" || ext == "jpeg") && img.color().has_alpha() {
-        let rgb = img.to_rgb8();
-        rgb.save(dest)
-            .with_context(|| format!("Failed to save RGB image to {:?}", dest))?;
-    } else {
-        img.save(dest)
-            .with_context(|| format!("Failed to save image to {:?}", dest))?;
-    }
     Ok(())
 }
 

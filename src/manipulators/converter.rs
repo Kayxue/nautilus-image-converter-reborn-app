@@ -1,19 +1,15 @@
-use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
-};
+use std::path::Path;
 
 use anyhow::Result;
 use image::{DynamicImage, ImageFormat};
 
 use crate::manipulators::Manipulator;
 
-#[derive(Debug, Clone, Default)]
-pub struct ConverterConfig {
-    pub targets: HashMap<PathBuf, ImageFormat>,
-    pub default: Option<ImageFormat>,
-}
+#[derive(Debug, Clone)]
+pub struct ConverterConfig(pub ImageFormat);
 
+/// Converts images to another format. The pixel data is left untouched; the
+/// actual re-encoding happens when the image is saved with the new extension.
 pub struct Converter(pub ConverterConfig);
 
 impl Manipulator for Converter {
@@ -21,12 +17,7 @@ impl Manipulator for Converter {
         Ok(image)
     }
 
-    fn target_extension(&self, source: &Path) -> Option<String> {
-        self.0
-            .targets
-            .get(source)
-            .or(self.0.default.as_ref())
-            .and_then(|f| f.extensions_str().first())
-            .map(|ext| (*ext).to_owned())
+    fn target_extension(&self, _source: &Path) -> Option<String> {
+        self.0.0.extensions_str().first().map(|e| (*e).to_owned())
     }
 }
