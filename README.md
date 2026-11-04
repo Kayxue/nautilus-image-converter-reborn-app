@@ -9,13 +9,9 @@ Application part of Nautilus Image Converter Reborn, which can help you convert,
 * **Launch from CLI:** As it becomes a standalone app, you can launch it form other places through CLI interface directly.
 
 ## Screenshots
-|Resize Image|Rotate Image|
-|-----|-----|
-|![](./static/screenshot1.png)|![](./static/screenshot2.png)|
-
-|Convert Image|
-|-----|
-|![](./static/screenshot3.png)|
+|Resize Image|Rotate Image|Convert Image|
+|-----|-----|-----|
+|![](./static/screenshot1.png)|![](./static/screenshot2.png)|![](./static/screenshot3.png)|
 
 ## Limitation
 * **Unsupported formats:** This app only supports formats supported by the image crate; formats such as HEIC are currently not supported.
