@@ -40,7 +40,7 @@ makepkg -si
 ```
 
 > [!NOTE]
-> Becuase AUR account registration service is currently unavailable, I can't push it to AUR. If you have an account, feel free to push it and open an issue to tell me.
+> Becuase AUR account registration service is currently unavailable, I can't push it to AUR. If you have an account and want to push it to AUR, please open an issue to tell me.
 
 ## Architecture
 
